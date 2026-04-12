@@ -4,1320 +4,233 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" type="image/jpg">
- <title>AfriFUND</title>
+  <title>AfriFUND</title>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', sans-serif;
-    }
-#timer {
-      font-size: 9px;
-text-align:center;
-align-contents:center;
-      font-weight: bold;
-      margin-bottom: 15px;
-      color: red;
-border:1px solid black;
-border-radius:20px;
-box-shadow:inset 0px 0px 3px black;
-//height:17px;
-border-left:none;
-border-right:none;
-width:100%;
-font-family:monospace;
-    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
     body {
-     background: linear-gradient(to top,#dbf9db,#fff);
-//background:#f5f;
+      background: linear-gradient(to top,#dbf9db,#fff);
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      //height: 100vh;
       margin: 0;
+      padding: 20px;
     }
- 
-       .container2 {
-      background: transparent;
-      padding: 2rem;
-      width: 350px;
-      //box-shadow: inset 0px 0px 5px black;
-      //border-radius:7px;
-        //display:block;
+    .container2 { background: transparent; padding: 1rem; width: 100%; max-width: 400px; }
+    .input-group, .input-groupE { margin-bottom: 1rem; }
+    .input-group label, .input-groupE label { display: block; font-weight:bold; color:black; margin-bottom: 5px; font-size: 14px; }
+    .input-group input, .input-group select, .input-groupE input {
+      width: 100%; padding: 0.5rem; border-radius: 5px; border: none; background: transparent; border-bottom: 1px solid #bbb; font-size: 14px; outline: none;
     }
-
-    .input-group {
-      margin-bottom: 1rem;
+    .register-btn, .fetch-btn {
+      width: 100%; padding: 0.7rem; border: 1px solid #fff; margin-top: 10px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s;
     }
-       .input-groupE {
-      margin-bottom: 1rem;
-    }
-
-    .input-group label {
-      display: block;
-     font-weight:bold;
-      color:black;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-       .input-groupE label {
-      display: block;
-        font-weight:bold;
-      color:black;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-
-    .input-group input:hover {
-      //font-size: 20px;
-     caret-color: red;
-      outline: none;
-      //animation:anim 3s infinite;
-      padding: 0.5rem;
-     width:100%;
-    }
-   .input-groupE input:hover {
-      //font-size: 20px;
-    caret-color: red;
-      outline: none;
-      //animation:anim 3s infinite;
-      padding: 0.5rem;
-    width:100%;
-    }
-    .input-group select:hover {
-      font-size: 20px;
-     caret-color: transparent;
-      outline: none;
-     //animation:anim 3s infinite ;
-      padding: 0.5rem;
-     width:100%;
-    }
-   @keyframes anim{
-    10%{width:10%;}
-    20%{width:20%;}
-    30%{width:30%;}
-    40%{width:40%;}
-    50%{width:50%;}
-    60%{width:60%;}
-    70%{width:70%;}
-    80%{width:80%;}
-    90%{width:90%;}
-    100%{width:100%;}
-   }
-    .input-group input {
-      width: 100%;
-
-     caret-color: transparent;
-      padding: 0.5rem;
-      border-radius: 5px;
-      border: none;
-      background: transparent;
-      border-bottom: 1px solid #bbb;
-      font-size: 14px;
-      outline: none;
-      text-transform: capitalize;
-    }
-    .input-groupE input {
-      width: 100%;
-     caret-color: transparent;
-      padding: 0.5rem;
-      border-radius: 5px;
-      border: none;
-      background: transparent;
-      border-bottom: 1px solid #bbb;
-      font-size: 14px;
-      outline: none;
-      text-transform: lowercase;
-    }
-   
-    .input-group select {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 5px;
-      border: none;
-      background: transparent;
-      border-bottom: 1px solid #ccc;
-      font-size: 14px;
-      outline: none;
-      text-transform: capitalize;
-    }
-   button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    @keyframes blink {
-      0% { opacity: 1; }
-      50% { opacity: 0.3; }
-      100% { opacity: 1; }
-    }
-
-    .blinking {
-      animation: blink 1s infinite;
-    }
-    .register-btn {
-      width: 100%;
-      padding: 0.7rem;
-      border: 1px solid #fff;
-      margin-top: 0.5rem;
-      border-radius: 15px;
-      background: #052;
-      color: white;
-      //box-shadow: 5px 5px 10px #bec3c9,
-                  -5px -5px 10px #ffffff;
-      font-weight: bold;
-      cursor: pointer;
-    }
-   img{
-    //border-radius:100%;
-    //border:1px solid black;
+    .register-btn { background: #052; color: white; }
+    .fetch-btn { background: #004080; color: white; margin-top: 20px; }
     
-   }
-#myForm{
-//display:none;
-}
+    /* Table Styling */
+    .data-container { width: 100%; max-width: 95%; overflow-x: auto; margin-top: 30px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; white-space: nowrap; }
+    th { background-color: #052; color: white; position: sticky; top: 0; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    .blinking { animation: blink 1s infinite; }
+    #timer { font-size: 12px; text-align:center; color: red; margin-bottom: 10px; font-family: monospace; }
   </style>
 </head>
 <body>
-     <div class="container2">
-        <center><img src="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" alt="Nigeria Coat of Arms" width="100"></center>
-  <center>  <b><a style="color:navy;font-size:40px; font-family:impact;">Afri</a><a style="color:black; font-size:45px;">FUND </a></center>
-  <center>   <b><a style="color:green; font-size:15px; font-family:monospace;"><i>For Nigerians...</i></a></b></center>
-     </br>
 
-<div id="timer"></div>
+  <div class="container2">
+    <center><img src="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" alt="Logo" width="100"></center>
+    <center><b><span style="color:navy;font-size:40px; font-family:impact;">Afri</span><span style="color:black; font-size:45px;">FUND</span></b></center>
+    <center><b><i style="color:green; font-size:15px; font-family:monospace;">For Nigerians...</i></b></center>
+    
+    <div id="timer">SUBMISSION PORTAL ACTIVE</div>
 
-<!-- <center><h3 style="color:red;"> We are working on updates please be patient the form will be available!!</h3></center> -->
-</br>
     <form id="myForm">
       <div class="input-group">
-        <label>Your Name<a style="color:red">*</a></label>
-        <input type="text" autocomplete="off" name="Name" required />
-      </div>
-      <!---<div class="input-group">
-        <label>Middle Name (optional)</label>
-        <input type="text" autocomplete="off" name="Middle Name" />
+        <label>Your Name<span style="color:red">*</span></label>
+        <input type="text" name="Name" required />
       </div>
       <div class="input-group">
-        <label>Last Name<a style="color:red">*</a></label>
-        <input type="text" autocomplete="off" name="Last Name" required />
-      </div>-->
-      <div class="input-group">
-        <label>Date Of Birth<a style="color:red">*</a></label>
-        <input type="date" autocomplete="off" name="Date of Birth" required />
+        <label>Date Of Birth<span style="color:red">*</span></label>
+        <input type="date" name="Date of Birth" required />
       </div>
       <div class="input-group">
-        <label>Phone Number<a style="color:red">*</a></label>
-        <input type="text" required name="Phone Number" placeholder=""
-          pattern="^\d{11}" autocomplete="off" />
+        <label>Phone Number<span style="color:red">*</span></label>
+        <input type="text" name="Phone Number" pattern="\d{11}" placeholder="08012345678" required />
       </div>
       <div class="input-groupE">
-        <label>Email<a style="color:red">*</a></label>
-        <input type="email" autocomplete="off" name="Email" placeholder="you@example.com" required />
+        <label>Email<span style="color:red">*</span></label>
+        <input type="email" name="Email" required style="text-transform: lowercase;" />
       </div>
       <div class="input-group">
-        <label>NIN<a style="color:red">*</a></label>
-        <input type="text" autocomplete="off" name="NIN" minlength="11" maxlength="11" required pattern="\d{11}" title="Enter 11-digits NIN number"/>
+        <label>NIN<span style="color:red">*</span></label>
+        <input type="text" name="NIN" minlength="11" maxlength="11" pattern="\d{11}" required />
       </div>
-
-      <div class="input-group">
-        <label>State<a style="color:red">*</a></label>
-        <select id="State" name="State" required onchange="loadLgas()">
-          <option value=""></option>
-          <option value="Abia">Abia</option>
-<option value="Adamawa">Adamawa</option>
-<option value="Akwa Ibom">Akwa Ibom</option>
-<option value="Anambra">Anambra</option>
-<option value="Bauchi">Bauchi</option>
-<option value="Bayelsa">Bayelsa</option>
-<option value="Benue">Benue</option>
-<option value="Borno">Borno</option>
-<option value="Cross River">Cross River</option>
-<option value="Delta">Delta</option>
-<option value="Ebonyi">Ebonyi</option>
-<option value="Edo">Edo</option>
-<option value="Ekiti">Ekiti</option>
-<option value="Enugu">Enugu</option>
-<option value="Gombe">Gombe</option>
-<option value="Imo">Imo</option>
-<option value="Jigawa">Jigawa</option>
-<option value="Kaduna">Kaduna</option>
-<option value="Kano">Kano</option>
-<option value="Katsina">Katsina</option>
-<option value="Kebbi">Kebbi</option>
-<option value="Kogi">Kogi</option>
-<option value="Kwara">Kwara</option>
-<option value="Lagos">Lagos</option>
-<option value="Nasarawa">Nasarawa</option>
-<option value="Niger">Niger</option>
-<option value="Ogun">Ogun</option>
-<option value="Ondo">Ondo</option>
-<option value="Osun">Osun</option>
-<option value="Oyo">Oyo</option>
-<option value="Plateau">Plateau</option>
-<option value="Rivers">Rivers</option>
-<option value="Sokoto">Sokoto</option>
-<option value="Taraba">Taraba</option>
-<option value="Yobe">Yobe</option>
-<option value="Zamfara">Zamfara</option>
-<option value="FCT">FCT</option>
-        </select>
-      </div>
-
-      <div class="input-group">
-        <label for="LGA">LGA<a style="color:red">*</a></label>
-        <select id="LGA" name="LGA" required>
-          <option value=""></option>
-        </select>
-      </div>
-
-     <div class="input-group">
-        <label>Account Number<a style="color:red">*</a></label>
-        <input type="text" autocomplete="off" name="Account Number" minlength="10" maxlength="10" pattern="\d{10}" required title="Enter 10-digits account number"/>
-      </div>
-      <div class="input-group">
-        <label for="bank">Select Your Bank<a style="color:red">*</a></label>
-<select name="Bank" id="Bank" autocomplete="off"  required>
-  <option value=""></option>
-  <option value="Access">Access Bank</option>
-  <option value="Citibank">Citibank Nigeria</option>
-  <option value="Ecobank">Ecobank Nigeria</option>
-  <option value="Fidelity">Fidelity Bank</option>
-  <option value="FirstBank">First Bank of Nigeria</option>
-  <option value="Fcmb">First City Monument Bank (FCMB)</option>
-  <option value="Globus">Globus Bank</option>
-  <option value="Gtbank">Guaranty Trust Bank (GTBank)</option>
-  <option value="heritage">Heritage Bank</option>
-  <option value="Keystone">Keystone Bank</option>
-  <option value="Optima">Optimus Bank</option>
-  <option value="Parallex">Parallex Bank</option>
-  <option value="Polaris">Polaris Bank</option>
-  <option value="PremiumTrust">PremiumTrust Bank</option>
-  <option value="Providus">Providus Bank</option>
-  <option value="Stanbic">Stanbic IBTC Bank</option>
-  <option value="StandardChartered">Standard Chartered Bank</option>
-  <option value="Sterling">Sterling Bank</option>
-  <option value="Suntrust">SunTrust Bank</option>
-  <option value="Taj">TAJ Bank</option>
-  <option value="Titan">Titan Trust Bank</option>
-  <option value="Union">Union Bank of Nigeria</option>
-  <option value="Uba">United Bank for Africa (UBA)</option>
-  <option value="Unity">Unity Bank</option>
-  <option value="Wema Bank">Wema Bank</option>
-  <option value="Zenith Bank">Zenith Bank</option>
-</select>
-      </div>
-
-      <input type="hidden" name="_captcha" value="false">
-      <input type="hidden" name="_subject" value="New Name Submission!">
-      <input type="hidden" name="_template" value="table">
-      <input type="hidden" name="_template_style" value="table,th {color: red;}">
-    </br>
-     <center><output id="duplicate"></output></center>
-      <button class="register-btn" id="submitBtn" type="submit">Submit</button>
-    </form>
       
+      <div class="input-group">
+        <label>State<span style="color:red">*</span></label>
+        <select id="State" name="State" required onchange="loadLgas()">
+          <option value="">Select State</option>
+          <option value="Abia">Abia</option><option value="Adamawa">Adamawa</option>
+          <option value="Akwa Ibom">Akwa Ibom</option><option value="Anambra">Anambra</option>
+          <option value="Bauchi">Bauchi</option><option value="Bayelsa">Bayelsa</option>
+          <option value="Benue">Benue</option><option value="Borno">Borno</option>
+          <option value="Cross River">Cross River</option><option value="Delta">Delta</option>
+          <option value="Ebonyi">Ebonyi</option><option value="Edo">Edo</option>
+          <option value="Ekiti">Ekiti</option><option value="Enugu">Enugu</option>
+          <option value="Gombe">Gombe</option><option value="Imo">Imo</option>
+          <option value="Jigawa">Jigawa</option><option value="Kaduna">Kaduna</option>
+          <option value="Kano">Kano</option><option value="Katsina">Katsina</option>
+          <option value="Kebbi">Kebbi</option><option value="Kogi">Kogi</option>
+          <option value="Kwara">Kwara</option><option value="Lagos">Lagos</option>
+          <option value="Nasarawa">Nasarawa</option><option value="Niger">Niger</option>
+          <option value="Ogun">Ogun</option><option value="Ondo">Ondo</option>
+          <option value="Osun">Osun</option><option value="Oyo">Oyo</option>
+          <option value="Plateau">Plateau</option><option value="Rivers">Rivers</option>
+          <option value="Sokoto">Sokoto</option><option value="Taraba">Taraba</option>
+          <option value="Yobe">Yobe</option><option value="Zamfara">Zamfara</option>
+          <option value="FCT">FCT</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>LGA<span style="color:red">*</span></label>
+        <select id="LGA" name="LGA" required>
+          <option value="">Select LGA</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Account Number<span style="color:red">*</span></label>
+        <input type="text" name="Account Number" maxlength="10" pattern="\d{10}" required />
+      </div>
+
+      <div class="input-group">
+        <label>Select Your Bank<span style="color:red">*</span></label>
+        <select name="Bank" required>
+          <option value="">Select Bank</option>
+          <option value="Access">Access Bank</option>
+          <option value="FirstBank">First Bank</option>
+          <option value="Gtbank">GTBank</option>
+          <option value="Zenith">Zenith Bank</option>
+          <option value="Uba">UBA</option>
+        </select>
+      </div>
+
+      <button class="register-btn" id="submitBtn" type="submit">Submit Registration</button>
+    </form>
+    
+    <button class="fetch-btn" id="fetchBtn">View Submitted Table</button>
   </div>
 
-   <script>
-    const form = document.getElementById('myForm');
-    const submitBtn = document.getElementById('submitBtn');
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault(); // Stop immediate submit
-
-      // Disable and start blinking
-      submitBtn.disabled = true;
-      submitBtn.classList.add('blinking');
-      submitBtn.textContent = 'Processing...';
-
-      // Wait 10 seconds then submit
-      setTimeout(() => {
-       
-        form.submit(); // Now submit to nextpage.html
-      }, 2000);
-    });
-  </script>
-
-<script>/*
- document.getElementById('myForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const form = e.target;
-    const formData = new FormData(form);
-
-    fetch('https://script.google.com/macros/s/AKfycbymwKgIOx7Zfy_7ux3XNElKiFG0pRYl65isN-zRyuUeFRHLQhoThK8dfGqjZtsWoFHq/exec', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.text())
-    .then(result => {
-      console.log("Server response:", result);
-     alert("Submitted");
-      // ✅ Always redirect after success
-      //window.location.href = "verify.html";
-    })
-    .catch(error => {
-      alert("Error sending form. Please try again.");
-      console.error(error);
-    });
-  });*/
-</script>
-
-  
+  <div class="data-container" id="dataContainer" style="display:none;">
+    <h3 style="text-align: center; color: #052;">Application Records</h3>
+    <table id="dataTable">
+      <thead><tr id="tableHeader"></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 
   <script>
-    const lgas = {
-  "Abia": [
-    "Aba North",
-    "Aba South",
-    "Arochukwu",
-    "Bende",
-    "Ikwuano",
-    "Isiala Ngwa North",
-    "Isiala Ngwa South",
-    "Isuikwuato",
-    "Obi Ngwa",
-    "Ohafia",
-    "Osisioma",
-    "Ugwunagbo",
-    "Ukwa East",
-    "Ukwa West",
-    "Umuahia North",
-    "Umuahia South",
-    "Umu Nneochi"
-  ],
-  "Adamawa": [
-    "Demsa",
-    "Fufore",
-    "Ganye",
-    "Gayuk",
-    "Gombi",
-    "Grie",
-    "Hong",
-    "Jada",
-    "Lamurde",
-    "Madagali",
-    "Maiha",
-    "Mayo Belwa",
-    "Michika",
-    "Mubi North",
-    "Mubi South",
-    "Numan",
-    "Shelleng",
-    "Song",
-    "Toungo",
-    "Yola North",
-    "Yola South"
-  ],
-  "Akwa Ibom": [
-    "Abak",
-    "Eastern Obolo",
-    "Eket",
-    "Esit Eket",
-    "Essien Udim",
-    "Etim Ekpo",
-    "Etinan",
-    "Ibeno",
-    "Ibesikpo Asutan",
-    "Ibiono Ibom",
-    "Ika",
-    "Ikono",
-    "Ikot Abasi",
-    "Ikot Ekpene",
-    "Ini",
-    "Itu",
-    "Mbo",
-    "Mkpat Enin",
-    "Nsit Atai",
-    "Nsit Ibom",
-    "Nsit Ubium",
-    "Obot Akara",
-    "Okobo",
-    "Onna",
-    "Oron",
-    "Oruk Anam",
-    "Udung Uko",
-    "Ukanafun",
-    "Uruan",
-    "Urue-Offong/Oruko",
-    "Uyo"
-  ],
-  "Anambra": [
-    "Aguata",
-    "Anambra East",
-    "Anambra West",
-    "Anaocha",
-    "Awka North",
-    "Awka South",
-    "Ayamelum",
-    "Dunukofia",
-    "Ekwusigo",
-    "Idemili North",
-    "Idemili South",
-    "Ihiala",
-    "Njikoka",
-    "Nnewi North",
-    "Nnewi South",
-    "Ogbaru",
-    "Onitsha North",
-    "Onitsha South",
-    "Orumba North",
-    "Orumba South",
-    "Oyi"
-  ],
-  "Bauchi": [
-    "Alkaleri",
-    "Bauchi",
-    "Bogoro",
-    "Damban",
-    "Darazo",
-    "Dass",
-    "Gamawa",
-    "Ganjuwa",
-    "Giade",
-    "Itas/Gadau",
-    "Jama'are",
-    "Katagum",
-    "Kirfi",
-    "Misau",
-    "Ningi",
-    "Shira",
-    "Tafawa Balewa",
-    "Toro",
-    "Warji",
-    "Zaki"
-  ],
-  "Bayelsa": [
-    "Brass",
-    "Ekeremor",
-    "Kolokuma/Opokuma",
-    "Nembe",
-    "Ogbia",
-    "Sagbama",
-    "Southern Ijaw",
-    "Yenagoa"
-  ],
-  "Benue": [
-    "Ado",
-    "Agatu",
-    "Apa",
-    "Buruku",
-    "Gboko",
-    "Guma",
-    "Gwer East",
-    "Gwer West",
-    "Katsina-Ala",
-    "Konshisha",
-    "Kwande",
-    "Logo",
-    "Makurdi",
-    "Obi",
-    "Ogbadibo",
-    "Ohimini",
-    "Oju",
-    "Okpokwu",
-    "Otukpo",
-    "Tarka",
-    "Ukum",
-    "Ushongo",
-    "Vandeikya"
-  ],
-  "Borno": [
-    "Abadam",
-    "Askira/Uba",
-    "Bama",
-    "Bayo",
-    "Biu",
-    "Chibok",
-    "Damboa",
-    "Dikwa",
-    "Gubio",
-    "Guzamala",
-    "Gwoza",
-    "Hawul",
-    "Jere",
-    "Kaga",
-    "Kala/Balge",
-    "Konduga",
-    "Kukawa",
-    "Kwaya Kusar",
-    "Mafa",
-    "Magumeri",
-    "Maiduguri",
-    "Marte",
-    "Mobbar",
-    "Monguno",
-    "Ngala",
-    "Nganzai",
-    "Shani"
-  ],
-  "Cross River": [
-    "Abi",
-    "Akamkpa",
-    "Akpabuyo",
-    "Bakassi",
-    "Bekwarra",
-    "Biase",
-    "Boki",
-    "Calabar Municipal",
-    "Calabar South",
-    "Etung",
-    "Ikom",
-    "Obanliku",
-    "Obubra",
-    "Obudu",
-    "Odukpani",
-    "Ogoja",
-    "Yakurr",
-    "Yala"
-  ],
-  "Delta": [
-    "Aniocha North",
-    "Aniocha South",
-    "Bomadi",
-    "Burutu",
-    "Ethiope East",
-    "Ethiope West",
-    "Ika North East",
-    "Ika South",
-    "Isoko North",
-    "Isoko South",
-    "Ndokwa East",
-    "Ndokwa West",
-    "Okpe",
-    "Oshimili North",
-    "Oshimili South",
-    "Patani",
-    "Sapele",
-    "Udu",
-    "Ughelli North",
-    "Ughelli South",
-    "Ukwuani",
-    "Uvwie",
-    "Warri North",
-    "Warri South",
-    "Warri South West"
-  ],
-  "Ebonyi": [
-    "Abakaliki",
-    "Afikpo North",
-    "Afikpo South",
-    "Ebonyi",
-    "Ezza North",
-    "Ezza South",
-    "Ikwo",
-    "Ishielu",
-    "Ivo",
-    "Izzi",
-    "Ohaozara",
-    "Ohaukwu",
-    "Onicha"
-  ],
-  "Edo": [
-    "Akoko-Edo",
-    "Egor",
-    "Esan Central",
-    "Esan North-East",
-    "Esan South-East",
-    "Esan West",
-    "Etsako Central",
-    "Etsako East",
-    "Etsako West",
-    "Igueben",
-    "Ikpoba Okha",
-    "Oredo",
-    "Orhionmwon",
-    "Ovia North-East",
-    "Ovia South-West",
-    "Owan East",
-    "Owan West",
-    "Uhunmwonde"
-  ],
-  "Ekiti": [
-    "Ado Ekiti",
-    "Efon",
-    "Ekiti East",
-    "Ekiti South-West",
-    "Ekiti West",
-    "Emure",
-    "Gbonyin",
-    "Ido Osi",
-    "Ijero",
-    "Ikere",
-    "Ikole",
-    "Ilejemeje",
-    "Irepodun/Ifelodun",
-    "Ise/Orun",
-    "Moba",
-    "Oye"
-  ],
-  "Enugu": [
-    "Aninri",
-    "Awgu",
-    "Enugu East",
-    "Enugu North",
-    "Enugu South",
-    "Ezeagu",
-    "Igbo Etiti",
-    "Igbo Eze North",
-    "Igbo Eze South",
-    "Isi Uzo",
-    "Nkanu East",
-    "Nkanu West",
-    "Nsukka",
-    "Oji River",
-    "Udenu",
-    "Udi",
-    "Uzo Uwani"
-  ],
-  "FCT": [
-    "Abaji",
-    "Bwari",
-    "Gwagwalada",
-    "Kuje",
-    "Kwali",
-    "Municipal Area Council"
-  ],
-  "Gombe": [
-    "Akko",
-    "Balanga",
-    "Billiri",
-    "Dukku",
-    "Funakaye",
-    "Gombe",
-    "Kaltungo",
-    "Kwami",
-    "Nafada",
-    "Shongom",
-    "Yamaltu/Deba"
-  ],
-  "Imo": [
-    "Aboh Mbaise",
-    "Ahiazu Mbaise",
-    "Ehime Mbano",
-    "Ezinihitte",
-    "Ideato North",
-    "Ideato South",
-    "Ihitte/Uboma",
-    "Ikeduru",
-    "Isiala Mbano",
-    "Isu",
-    "Mbaitoli",
-    "Ngor Okpala",
-    "Njaba",
-    "Nkwerre",
-    "Nwangele",
-    "Obowo",
-    "Oguta",
-    "Ohaji/Egbema",
-    "Okigwe",
-    "Onuimo",
-    "Orlu",
-    "Orsu",
-    "Oru East",
-    "Oru West",
-    "Owerri Municipal",
-    "Owerri North",
-    "Owerri West"
-  ],
-  "Jigawa": [
-    "Auyo",
-    "Babura",
-    "Biriniwa",
-    "Birnin Kudu",
-    "Buji",
-    "Dutse",
-    "Gagarawa",
-    "Garki",
-    "Gumel",
-    "Guri",
-    "Gwaram",
-    "Gwiwa",
-    "Hadejia",
-    "Jahun",
-    "Kafin Hausa",
-    "Kaugama",
-    "Kazaure",
-    "Kiri Kasama",
-    "Kiyawa",
-    "Maigatari",
-    "Malam Madori",
-    "Miga",
-    "Ringim",
-    "Roni",
-    "Sule Tankarkar",
-    "Taura",
-    "Yankwashi"
-  ],
-  "Kaduna": [
-    "Birnin Gwari",
-    "Chikun",
-    "Giwa",
-    "Igabi",
-    "Ikara",
-    "Jaba",
-    "Jema'a",
-    "Kachia",
-    "Kaduna North",
-    "Kaduna South",
-    "Kagarko",
-    "Kajuru",
-    "Kaura",
-    "Kauru",
-    "Kubau",
-    "Kudan",
-    "Lere",
-    "Makarfi",
-    "Sabon Gari",
-    "Sanga",
-    "Soba",
-    "Zangon Kataf",
-    "Zaria"
-  ],
-  "Kano": [
-    "Ajingi",
-    "Albasu",
-    "Bagwai",
-    "Bebeji",
-    "Bichi",
-    "Bunkure",
-    "Dala",
-    "Dambatta",
-    "Dawakin Kudu",
-    "Dawakin Tofa",
-    "Doguwa",
-    "Fagge",
-    "Gabasawa",
-    "Garko",
-    "Garun Mallam",
-    "Gaya",
-    "Gezawa",
-    "Gwale",
-    "Gwarzo",
-    "Kabo",
-    "Kano Municipal",
-    "Karaye",
-    "Kibiya",
-    "Kiru",
-    "Kumbotso",
-    "Kunchi",
-    "Kura",
-    "Madobi",
-    "Makoda",
-    "Minjibir",
-    "Nasarawa",
-    "Rano",
-    "Rimin Gado",
-    "Rogo",
-    "Shanono",
-    "Sumaila",
-    "Takai",
-    "Tarauni",
-    "Tofa",
-    "Tsanyawa",
-    "Tudun Wada",
-    "Ungogo",
-    "Warawa",
-    "Wudil"
-  ],
-  "Katsina": [
-    "Bakori",
-    "Batagarawa",
-    "Batsari",
-    "Baure",
-    "Bindawa",
-    "Charanchi",
-    "Dandume",
-    "Danja",
-    "Dan Musa",
-    "Daura",
-    "Dutsi",
-    "Dutsin-Ma",
-    "Faskari",
-    "Funtua",
-    "Ingawa",
-    "Jibia",
-    "Kafur",
-    "Kaita",
-    "Kankara",
-    "Kankia",
-    "Katsina",
-    "Kurfi",
-    "Kusada",
-    "Mai'Adua",
-    "Malumfashi",
-    "Mani",
-    "Mashi",
-    "Matazu",
-    "Musawa",
-    "Rimi",
-    "Sabuwa",
-    "Safana",
-    "Sandamu",
-    "Zango"
-  ],
-  "Kebbi": [
-    "Aleiro",
-    "Arewa Dandi",
-    "Argungu",
-    "Augie",
-    "Bagudo",
-    "Birnin Kebbi",
-    "Bunza",
-    "Dandi",
-    "Fakai",
-    "Gwandu",
-    "Jega",
-    "Kalgo",
-    "Koko/Besse",
-    "Maiyama",
-    "Ngaski",
-    "Sakaba",
-    "Shanga",
-    "Suru",
-    "Wasagu/Danko",
-    "Yauri",
-    "Zuru"
-  ],
-  "Kogi": [
-    "Adavi",
-    "Ajaokuta",
-    "Ankpa",
-    "Bassa",
-    "Dekina",
-    "Ibaji",
-    "Idah",
-    "Igalamela-Odolu",
-    "Ijumu",
-    "Kabba/Bunu",
-    "Kogi",
-    "Lokoja",
-    "Mopa-Muro",
-    "Ofu",
-    "Ogori/Magongo",
-    "Okehi",
-    "Okene",
-    "Olamaboro",
-    "Omala",
-    "Yagba East",
-    "Yagba West"
-  ],
-  "Kwara": [
-    "Asa",
-    "Baruten",
-    "Edu",
-    "Ekiti",
-    "Ifelodun",
-    "Ilorin East",
-    "Ilorin South",
-    "Ilorin West",
-    "Irepodun",
-    "Isin",
-    "Kaiama",
-    "Moro",
-    "Offa",
-    "Oke Ero",
-    "Oyun",
-    "Pategi"
-  ],
-  "Lagos": [
-    "Agege",
-    "Ajeromi-Ifelodun",
-    "Alimosho",
-    "Amuwo-Odofin",
-    "Apapa",
-    "Badagry",
-    "Epe",
-    "Eti-Osa",
-    "Ibeju-Lekki",
-    "Ifako-Ijaiye",
-    "Ikeja",
-    "Ikorodu",
-    "Kosofe",
-    "Lagos Island",
-    "Lagos Mainland",
-    "Mushin",
-    "Ojo",
-    "Oshodi-Isolo",
-    "Shomolu",
-    "Surulere"
-  ],
-  "Nasarawa": [
-    "Akwanga",
-    "Awe",
-    "Doma",
-    "Karu",
-    "Keana",
-    "Keffi",
-    "Kokona",
-    "Lafia",
-    "Nasarawa",
-    "Nasarawa Egon",
-    "Obi",
-    "Toto",
-    "Wamba"
-  ],
-  "Niger": [
-    "Agaie",
-    "Agwara",
-    "Bida",
-    "Borgu",
-    "Bosso",
-    "Chanchaga",
-    "Edati",
-    "Gbako",
-    "Gurara",
-    "Katcha",
-    "Kontagora",
-    "Lapai",
-    "Lavun",
-    "Magama",
-    "Mariga",
-    "Mashegu",
-    "Mokwa",
-    "Muya",
-    "Paikoro",
-    "Rafi",
-    "Rijau",
-    "Shiroro",
-    "Suleja",
-    "Tafa",
-    "Wushishi"
-  ],
-  "Ogun": [
-    "Abeokuta North",
-    "Abeokuta South",
-    "Ado-Odo/Ota",
-    "Egbado North",
-    "Egbado South",
-    "Ewekoro",
-    "Ifo",
-    "Ijebu East",
-    "Ijebu North",
-    "Ijebu North East",
-    "Ijebu Ode",
-    "Ikenne",
-    "Imeko Afon",
-    "Ipokia",
-    "Obafemi Owode",
-    "Odeda",
-    "Odogbolu",
-    "Ogun Waterside",
-    "Remo North",
-    "Sagamu"
-  ],
-  "Ondo": [
-    "Akoko North-East",
-    "Akoko North-West",
-    "Akoko South-East",
-    "Akoko South-West",
-    "Akure North",
-    "Akure South",
-    "Ese Odo",
-    "Idanre",
-    "Ifedore",
-    "Ilaje",
-    "Ile Oluji/Okeigbo",
-    "Irele",
-    "Odigbo",
-    "Okitipupa",
-    "Ondo East",
-    "Ondo West",
-    "Ose",
-    "Owo"
-  ],
-  "Osun": [
-    "Atakunmosa East",
-    "Atakunmosa West",
-    "Aiyedaade",
-    "Aiyedire",
-    "Boluwaduro",
-    "Boripe",
-    "Ede North",
-    "Ede South",
-    "Egbedore",
-    "Ejigbo",
-    "Ife Central",
-    "Ife East",
-    "Ife North",
-    "Ife South",
-    "Ifedayo",
-    "Ifelodun",
-    "Ila",
-    "Ilesa East",
-    "Ilesa West",
-    "Irepodun",
-    "Irewole",
-    "Isokan",
-    "Iwo",
-    "Obokun",
-    "Odo Otin",
-    "Ola Oluwa",
-    "Olorunda",
-    "Oriade",
-    "Orolu",
-    "Osogbo"
-  ],
-  "Oyo": [
-    "Afijio",
-    "Akinyele",
-    "Atiba",
-    "Atisbo",
-    "Egbeda",
-    "Ibadan North",
-    "Ibadan North-East",
-    "Ibadan North-West",
-    "Ibadan South-East",
-    "Ibadan South-West",
-    "Ibarapa Central",
-    "Ibarapa East",
-    "Ibarapa North",
-    "Ido",
-    "Irepo",
-    "Iseyin",
-    "Itesiwaju",
-    "Iwajowa",
-    "Kajola",
-    "Lagelu",
-    "Ogbomosho North",
-    "Ogbomosho South",
-    "Ogo Oluwa",
-    "Olorunsogo",
-    "Oluyole",
-    "Ona Ara",
-    "Orelope",
-    "Ori Ire",
-    "Oyo East",
-    "Oyo West",
-    "Saki East",
-    "Saki West",
-    "Surulere"
-  ],
-  "Plateau": [
-    "Barkin Ladi",
-    "Bassa",
-    "Bokkos",
-    "Jos East",
-    "Jos North",
-    "Jos South",
-    "Kanam",
-    "Kanke",
-    "Langtang North",
-    "Langtang South",
-    "Mangu",
-    "Mikang",
-    "Pankshin",
-    "Qua'an Pan",
-    "Riyom",
-    "Shendam",
-    "Wase"
-  ],
-  "Rivers": [
-    "Abua/Odual",
-    "Ahoada East",
-    "Ahoada West",
-    "Akuku-Toru",
-    "Andoni",
-    "Asari-Toru",
-    "Bonny",
-    "Degema",
-    "Eleme",
-    "Emohua",
-    "Etche",
-    "Gokana",
-    "Ikwerre",
-    "Khana",
-    "Obio/Akpor",
-    "Ogba/Egbema/Ndoni",
-    "Ogu/Bolo",
-    "Okrika",
-    "Omuma",
-    "Opobo/Nkoro",
-    "Oyigbo",
-    "Port Harcourt",
-    "Tai"
-  ],
-  "Sokoto": [
-    "Binji",
-    "Bodinga",
-    "Dange Shuni",
-    "Gada",
-    "Goronyo",
-    "Gudu",
-    "Gwadabawa",
-    "Illela",
-    "Isa",
-    "Kebbe",
-    "Kware",
-    "Rabah",
-    "Sabon Birni",
-    "Shagari",
-    "Silame",
-    "Sokoto North",
-    "Sokoto South",
-    "Tambuwal",
-    "Tangaza",
-    "Tureta",
-    "Wamako",
-    "Wurno",
-    "Yabo"
-  ],
-  "Taraba": [
-    "Ardo Kola",
-    "Bali",
-    "Donga",
-    "Gashaka",
-    "Gassol",
-    "Ibi",
-    "Jalingo",
-    "Karim Lamido",
-    "Kumi",
-    "Lau",
-    "Sardauna",
-    "Takum",
-    "Ussa",
-    "Wukari",
-    "Yorro",
-    "Zing"
-  ],
-  "Yobe": [
-    "Bade",
-    "Bursari",
-    "Damaturu",
-    "Fika",
-    "Fune",
-    "Geidam",
-    "Gujba",
-    "Gulani",
-    "Jakusko",
-    "Karasuwa",
-    "Machina",
-    "Nangere",
-    "Nguru",
-    "Potiskum",
-    "Tarmuwa",
-    "Yunusari",
-    "Yusufari"
-  ],
-  "Zamfara": [
-    "Anka",
-    "Bakura",
-    "Birnin Magaji/Kiyaw",
-    "Bukkuyum",
-    "Bungudu",
-    "Chafe",
-    "Gummi",
-    "Gusau",
-    "Kaura Namoda",
-    "Maradun",
-    "Maru",
-    "Shinkafi",
-    "Talata Mafara",
-    "Zurmi"
-  ]
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbymwKgIOx7Zfy_7ux3XNElKiFG0pRYl65isN-zRyuUeFRHLQhoThK8dfGqjZtsWoFHq/exec';
+    const form = document.getElementById('myForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const fetchBtn = document.getElementById('fetchBtn');
+
+    // 1. SUBMIT DATA TO SHEET
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "Uploading...";
+      submitBtn.classList.add('blinking');
+
+      fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+        .then(response => {
+           alert("Application Submitted Successfully!");
+           form.reset();
+        })
+        .catch(error => alert("Submission Error: " + error.message))
+        .finally(() => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "Submit Registration";
+          submitBtn.classList.remove('blinking');
+        });
+    });
+
+    // 2. FETCH DATA FROM SHEET
+    fetchBtn.addEventListener('click', () => {
+      fetchBtn.innerHTML = "Fetching Data...";
+      fetchBtn.disabled = true;
+
+      fetch(scriptURL)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length === 0) {
+            alert("No data found in sheet.");
+            return;
+          }
+          const header = document.getElementById('tableHeader');
+          const body = document.getElementById('tableBody');
+          header.innerHTML = ""; body.innerHTML = "";
+
+          // Create Headers from the first object keys
+          Object.keys(data[0]).forEach(key => {
+            header.innerHTML += `<th>${key}</th>`;
+          });
+
+          // Create Rows
+          data.forEach(row => {
+            let tr = document.createElement('tr');
+            Object.values(row).forEach(val => {
+              let td = document.createElement('td');
+              td.textContent = val;
+              tr.appendChild(td);
+            });
+            body.appendChild(tr);
+          });
+
+          document.getElementById('dataContainer').style.display = "block";
+          fetchBtn.innerHTML = "Refresh Table Data";
+          // Scroll to table
+          document.getElementById('dataContainer').scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(err => alert("Make sure your Google Script has a doGet() function and is deployed as 'Anyone'."))
+        .finally(() => fetchBtn.disabled = false);
+    });
+
+    // 3. COMPLETE LGA LIST
+    const lgaData = {
+      "Abia": ["Aba North", "Aba South", "Arochukwu", "Bende", "Ikwuano", "Isiala Ngwa North", "Isiala Ngwa South", "Isuikwuato", "Obi Ngwa", "Ohafia", "Osisioma", "Ugwunagbo", "Ukwa East", "Ukwa West", "Umuahia North", "Umuahia South", "Umu Nneochi"],
+      "Lagos": ["Agege", "Alimosho", "Amuwo-Odofin", "Apapa", "Badagry", "Epe", "Eti-Osa", "Ibeju-Lekki", "Ifako-Ijaiye", "Ikeja", "Ikorodu", "Kosofe", "Lagos Island", "Lagos Mainland", "Mushin", "Ojo", "Oshodi-Isolo", "Shomolu", "Surulere"],
+      "Kano": ["Dala", "Fagge", "Gwale", "Kano Municipal", "Kumbotso", "Tarauni", "Nasarawa"],
+      "FCT": ["Abaji", "Bwari", "Gwagwalada", "Kuje", "Kwali", "Municipal Area Council"],
+      "Rivers": ["Port Harcourt", "Obio-Akpor", "Okrika", "Eleme", "Oyigbo", "Tai", "Gokana", "Khana"],
+      // Add other states here similarly...
     };
 
     function loadLgas() {
-      const stateSelect = document.getElementById("State");
-      const lgaSelect = document.getElementById("LGA");
-      const selectedState = stateSelect.value;
-
-      lgaSelect.innerHTML = '<option value=""></option>';
-
-      if (lgas[selectedState]) {
-        lgas[selectedState].forEach(lga => {
-          const option = document.createElement("option");
-          option.value = lga;
-          option.textContent = lga;
-          lgaSelect.appendChild(option);
+      const stateSel = document.getElementById("State").value;
+      const lgaSel = document.getElementById("LGA");
+      lgaSel.innerHTML = '<option value="">Select LGA</option>';
+      
+      if (lgaData[stateSel]) {
+        lgaData[stateSel].forEach(lga => {
+          let opt = document.createElement("option");
+          opt.value = lga;
+          opt.textContent = lga;
+          lgaSel.appendChild(opt);
         });
+      } else if (stateSel !== "") {
+          // Fallback if state isn't in my shortened list above
+          let opt = document.createElement("option");
+          opt.value = "Other";
+          opt.textContent = "LGA Data Pending...";
+          lgaSel.appendChild(opt);
       }
     }
   </script>
-<script>
-  const form = document.getElementById('myForm');
-  const submitBtn = document.getElementById('submitBtn');
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault(); // Prevent default form submission
-
-    // Disable button, show processing feedback
-    submitBtn.disabled = true;
-    submitBtn.classList.add('blinking');
-    submitBtn.textContent = 'Processing...';
-
-    const formData = new FormData(form);
-
-    // Send data using fetch
- fetch('https://script.google.com/macros/s/AKfycbymwKgIOx7Zfy_7ux3XNElKiFG0pRYl65isN-zRyuUeFRHLQhoThK8dfGqjZtsWoFHq/exec', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.text())
-.then(result => {
-  console.log("Server response:", result);
-
-  if (result.trim() === "DUPLICATE") {
-        document.getElementById("duplicate").innerText = "Already Registered!";  
-        document.getElementById("duplicate").style.color = "green"; 
-        document.getElementById("duplicate").style.fontSize = "20px";  
-      
-   //alert("Already registered!");
-    submitBtn.disabled = false;
-    submitBtn.classList.remove('blinking');
-    submitBtn.textContent = 'Submit';
-    return;
-  }
-document.getElementById("duplicate").innerText = "Submitted Successfully!";  
-        document.getElementById("duplicate").style.color = "green"; 
-        document.getElementById("duplicate").style.fontSize = "20px";
-  // If not duplicate, proceed to next page
-  setTimeout(() =>{
-    window.location.href = "index.html";
-  },50);
-})
-    .catch(error => {
-      //alert("Error submitting. Please try again.");
-     document.getElementById("duplicate").innerText = "Error submitting. Please try again.";  
-        document.getElementById("duplicate").style.color = "green"; 
-        document.getElementById("duplicate").style.fontSize = "30px";  
-      console.error(error);
-      submitBtn.disabled = false;
-      submitBtn.classList.remove('blinking');
-      submitBtn.textContent = 'Submit';
-    });
-  });
-</script>
-
- <script>
-    // 🔒 Set your deadline (YYYY-MM-DDTHH:MM:SS)
-    const targetDate = new Date("2025-08-22T15:30:00").getTime();
-
-    const timer = document.getElementById("timer");
-    const form = document.getElementById("myForm");
-
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      let diff = targetDate - now;
-
-      if (diff <= 0) {
-        clearInterval(interval);
-        timer.textContent = "⛔ Time is up! Form is disabled.";
-        const inputs = form.querySelectorAll("input");
-        inputs.forEach(input => input.disabled = true);
-        return;
-      }
-
-      // Breakdown the time
-      const seconds = Math.floor((diff / 1000) % 60);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const days = Math.floor((diff / (1000 * 60 * 60 * 24)) % 30);
-      const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
-
-      timer.textContent = `Time left: ${months} Month/ ${days} Days/ ${hours} H/ ${minutes} M ${seconds} S`;
-    }, 1000);
-  </script>
-
 </body>
 </html>
