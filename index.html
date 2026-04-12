@@ -1,236 +1,134 @@
+To create a **new form** that collects data from your website and stores it in a Google Sheet, you need two parts: the **HTML Form** (which you already have) and the **Google Apps Script** (the bridge).
+Since you are starting fresh, follow these steps to ensure the data actually enters the sheet.
+### Step 1: Prepare the Google Sheet
+ 1. Create a new Google Sheet.
+ 2. In the first row (A1, B1, C1, etc.), type these **exact** headers:
+   * Name, Date of Birth, Phone Number, Email, NIN, State, LGA, Account Number, Bank
+### Step 2: The Google Apps Script (The Backend)
+This script handles both **saving** data (POST) and **showing** the table (GET).
+ 1. In your Sheet, go to **Extensions > Apps Script**.
+ 2. Delete any existing code and paste this:
+```javascript
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var newRow = [
+    e.parameter.Name,
+    e.parameter["Date of Birth"],
+    e.parameter["Phone Number"],
+    e.parameter.Email,
+    e.parameter.NIN,
+    e.parameter.State,
+    e.parameter.LGA,
+    e.parameter["Account Number"],
+    e.parameter.Bank
+  ];
+  sheet.appendRow(newRow);
+  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+}
+
+function doGet() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var jsonArray = [];
+  
+  for (var i = 1; i < data.length; i++) {
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = data[i][j];
+    }
+    jsonArray.push(obj);
+  }
+  return ContentService.createTextOutput(JSON.stringify(jsonArray)).setMimeType(ContentService.MimeType.JSON);
+}
+
+```
+ 3. **Crucial:** Click **Deploy > New Deployment**.
+ 4. Select **Web App**.
+ 5. Set "Execute as" to **Me**.
+ 6. Set "Who has access" to **Anyone**.
+ 7. Click **Deploy**, authorize permissions, and **copy the Web App URL**.
+### Step 3: The HTML Form
+This code uses your original design but is pre-configured to talk to the script above. **Replace the scriptURL variable with your URL from Step 2.**
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" href="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" type="image/jpg">
-  <title>AfriFUND</title>
+  <meta charset="UTF-8">
+  <title>AfriFUND Data Portal</title>
   <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body {
-      background: linear-gradient(to top,#dbf9db,#fff);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 0;
-      padding: 20px;
-    }
-    .container2 { background: transparent; padding: 1rem; width: 100%; max-width: 400px; }
-    .input-group, .input-groupE { margin-bottom: 1rem; }
-    .input-group label, .input-groupE label { display: block; font-weight:bold; color:black; margin-bottom: 5px; font-size: 14px; }
-    .input-group input, .input-group select, .input-groupE input {
-      width: 100%; padding: 0.5rem; border-radius: 5px; border: none; background: transparent; border-bottom: 1px solid #bbb; font-size: 14px; outline: none;
-    }
-    .register-btn, .fetch-btn {
-      width: 100%; padding: 0.7rem; border: 1px solid #fff; margin-top: 10px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s;
-    }
-    .register-btn { background: #052; color: white; }
-    .fetch-btn { background: #004080; color: white; margin-top: 20px; }
-    
-    /* Table Styling */
-    .data-container { width: 100%; max-width: 95%; overflow-x: auto; margin-top: 30px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; white-space: nowrap; }
-    th { background-color: #052; color: white; position: sticky; top: 0; }
-    tr:nth-child(even) { background-color: #f9f9f9; }
-
-    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-    .blinking { animation: blink 1s infinite; }
-    #timer { font-size: 12px; text-align:center; color: red; margin-bottom: 10px; font-family: monospace; }
+    body { font-family: sans-serif; background: #f4f4f4; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    .form-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; }
+    .input-group { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+    input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 100%; padding: 10px; margin-top: 10px; cursor: pointer; border-radius: 5px; border: none; font-weight: bold; }
+    .submit-btn { background: #052; color: white; }
+    .fetch-btn { background: #004080; color: white; }
+    .table-container { margin-top: 30px; width: 90%; overflow-x: auto; display: none; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #052; color: white; }
   </style>
 </head>
 <body>
 
-  <div class="container2">
-    <center><img src="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" alt="Logo" width="100"></center>
-    <center><b><span style="color:navy;font-size:40px; font-family:impact;">Afri</span><span style="color:black; font-size:45px;">FUND</span></b></center>
-    <center><b><i style="color:green; font-size:15px; font-family:monospace;">For Nigerians...</i></b></center>
-    
-    <div id="timer">SUBMISSION PORTAL ACTIVE</div>
-
-    <form id="myForm">
-      <div class="input-group">
-        <label>Your Name<span style="color:red">*</span></label>
-        <input type="text" name="Name" required />
-      </div>
-      <div class="input-group">
-        <label>Date Of Birth<span style="color:red">*</span></label>
-        <input type="date" name="Date of Birth" required />
-      </div>
-      <div class="input-group">
-        <label>Phone Number<span style="color:red">*</span></label>
-        <input type="text" name="Phone Number" pattern="\d{11}" placeholder="08012345678" required />
-      </div>
-      <div class="input-groupE">
-        <label>Email<span style="color:red">*</span></label>
-        <input type="email" name="Email" required style="text-transform: lowercase;" />
-      </div>
-      <div class="input-group">
-        <label>NIN<span style="color:red">*</span></label>
-        <input type="text" name="NIN" minlength="11" maxlength="11" pattern="\d{11}" required />
-      </div>
+  <div class="form-card">
+    <h2 style="text-align:center; color:#052;">AfriFUND Form</h2>
+    <form id="dataForm">
+      <div class="input-group"><label>Name</label><input type="text" name="Name" required></div>
+      <div class="input-group"><label>Date of Birth</label><input type="date" name="Date of Birth" required></div>
+      <div class="input-group"><label>Phone Number</label><input type="text" name="Phone Number" required></div>
+      <div class="input-group"><label>Email</label><input type="email" name="Email" required></div>
+      <div class="input-group"><label>NIN</label><input type="text" name="NIN" required></div>
+      <div class="input-group"><label>State</label><input type="text" name="State" required></div>
+      <div class="input-group"><label>LGA</label><input type="text" name="LGA" required></div>
+      <div class="input-group"><label>Account Number</label><input type="text" name="Account Number" required></div>
+      <div class="input-group"><label>Bank</label><input type="text" name="Bank" required></div>
       
-      <div class="input-group">
-        <label>State<span style="color:red">*</span></label>
-        <select id="State" name="State" required onchange="loadLgas()">
-          <option value="">Select State</option>
-          <option value="Abia">Abia</option><option value="Adamawa">Adamawa</option>
-          <option value="Akwa Ibom">Akwa Ibom</option><option value="Anambra">Anambra</option>
-          <option value="Bauchi">Bauchi</option><option value="Bayelsa">Bayelsa</option>
-          <option value="Benue">Benue</option><option value="Borno">Borno</option>
-          <option value="Cross River">Cross River</option><option value="Delta">Delta</option>
-          <option value="Ebonyi">Ebonyi</option><option value="Edo">Edo</option>
-          <option value="Ekiti">Ekiti</option><option value="Enugu">Enugu</option>
-          <option value="Gombe">Gombe</option><option value="Imo">Imo</option>
-          <option value="Jigawa">Jigawa</option><option value="Kaduna">Kaduna</option>
-          <option value="Kano">Kano</option><option value="Katsina">Katsina</option>
-          <option value="Kebbi">Kebbi</option><option value="Kogi">Kogi</option>
-          <option value="Kwara">Kwara</option><option value="Lagos">Lagos</option>
-          <option value="Nasarawa">Nasarawa</option><option value="Niger">Niger</option>
-          <option value="Ogun">Ogun</option><option value="Ondo">Ondo</option>
-          <option value="Osun">Osun</option><option value="Oyo">Oyo</option>
-          <option value="Plateau">Plateau</option><option value="Rivers">Rivers</option>
-          <option value="Sokoto">Sokoto</option><option value="Taraba">Taraba</option>
-          <option value="Yobe">Yobe</option><option value="Zamfara">Zamfara</option>
-          <option value="FCT">FCT</option>
-        </select>
-      </div>
-
-      <div class="input-group">
-        <label>LGA<span style="color:red">*</span></label>
-        <select id="LGA" name="LGA" required>
-          <option value="">Select LGA</option>
-        </select>
-      </div>
-
-      <div class="input-group">
-        <label>Account Number<span style="color:red">*</span></label>
-        <input type="text" name="Account Number" maxlength="10" pattern="\d{10}" required />
-      </div>
-
-      <div class="input-group">
-        <label>Select Your Bank<span style="color:red">*</span></label>
-        <select name="Bank" required>
-          <option value="">Select Bank</option>
-          <option value="Access">Access Bank</option>
-          <option value="FirstBank">First Bank</option>
-          <option value="Gtbank">GTBank</option>
-          <option value="Zenith">Zenith Bank</option>
-          <option value="Uba">UBA</option>
-        </select>
-      </div>
-
-      <button class="register-btn" id="submitBtn" type="submit">Submit Registration</button>
+      <button type="submit" class="submit-btn" id="subBtn">Save to Sheet</button>
     </form>
-    
-    <button class="fetch-btn" id="fetchBtn">View Submitted Table</button>
+    <button class="fetch-btn" id="viewBtn">View Data Table</button>
   </div>
 
-  <div class="data-container" id="dataContainer" style="display:none;">
-    <h3 style="text-align: center; color: #052;">Application Records</h3>
+  <div class="table-container" id="tableBox">
     <table id="dataTable">
-      <thead><tr id="tableHeader"></tr></thead>
-      <tbody id="tableBody"></tbody>
+      <thead id="tHead"></thead>
+      <tbody id="tBody"></tbody>
     </table>
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbymwKgIOx7Zfy_7ux3XNElKiFG0pRYl65isN-zRyuUeFRHLQhoThK8dfGqjZtsWoFHq/exec';
-    const form = document.getElementById('myForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const fetchBtn = document.getElementById('fetchBtn');
+    // PASTE YOUR GOOGLE WEB APP URL HERE
+    const scriptURL = 'PASTE_YOUR_URL_HERE';
+    const form = document.getElementById('dataForm');
 
-    // 1. SUBMIT DATA TO SHEET
     form.addEventListener('submit', e => {
       e.preventDefault();
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = "Uploading...";
-      submitBtn.classList.add('blinking');
-
+      document.getElementById('subBtn').innerText = "Saving...";
       fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-        .then(response => {
-           alert("Application Submitted Successfully!");
-           form.reset();
+        .then(res => {
+          alert("Data saved successfully!");
+          form.reset();
+          document.getElementById('subBtn').innerText = "Save to Sheet";
         })
-        .catch(error => alert("Submission Error: " + error.message))
-        .finally(() => {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = "Submit Registration";
-          submitBtn.classList.remove('blinking');
-        });
+        .catch(err => alert("Error: " + err.message));
     });
 
-    // 2. FETCH DATA FROM SHEET
-    fetchBtn.addEventListener('click', () => {
-      fetchBtn.innerHTML = "Fetching Data...";
-      fetchBtn.disabled = true;
-
+    document.getElementById('viewBtn').addEventListener('click', () => {
       fetch(scriptURL)
         .then(res => res.json())
         .then(data => {
-          if (data.length === 0) {
-            alert("No data found in sheet.");
-            return;
-          }
-          const header = document.getElementById('tableHeader');
-          const body = document.getElementById('tableBody');
-          header.innerHTML = ""; body.innerHTML = "";
-
-          // Create Headers from the first object keys
-          Object.keys(data[0]).forEach(key => {
-            header.innerHTML += `<th>${key}</th>`;
-          });
-
-          // Create Rows
-          data.forEach(row => {
-            let tr = document.createElement('tr');
-            Object.values(row).forEach(val => {
-              let td = document.createElement('td');
-              td.textContent = val;
-              tr.appendChild(td);
-            });
-            body.appendChild(tr);
-          });
-
-          document.getElementById('dataContainer').style.display = "block";
-          fetchBtn.innerHTML = "Refresh Table Data";
-          // Scroll to table
-          document.getElementById('dataContainer').scrollIntoView({ behavior: 'smooth' });
-        })
-        .catch(err => alert("Make sure your Google Script has a doGet() function and is deployed as 'Anyone'."))
-        .finally(() => fetchBtn.disabled = false);
-    });
-
-    // 3. COMPLETE LGA LIST
-    const lgaData = {
-      "Abia": ["Aba North", "Aba South", "Arochukwu", "Bende", "Ikwuano", "Isiala Ngwa North", "Isiala Ngwa South", "Isuikwuato", "Obi Ngwa", "Ohafia", "Osisioma", "Ugwunagbo", "Ukwa East", "Ukwa West", "Umuahia North", "Umuahia South", "Umu Nneochi"],
-      "Lagos": ["Agege", "Alimosho", "Amuwo-Odofin", "Apapa", "Badagry", "Epe", "Eti-Osa", "Ibeju-Lekki", "Ifako-Ijaiye", "Ikeja", "Ikorodu", "Kosofe", "Lagos Island", "Lagos Mainland", "Mushin", "Ojo", "Oshodi-Isolo", "Shomolu", "Surulere"],
-      "Kano": ["Dala", "Fagge", "Gwale", "Kano Municipal", "Kumbotso", "Tarauni", "Nasarawa"],
-      "FCT": ["Abaji", "Bwari", "Gwagwalada", "Kuje", "Kwali", "Municipal Area Council"],
-      "Rivers": ["Port Harcourt", "Obio-Akpor", "Okrika", "Eleme", "Oyigbo", "Tai", "Gokana", "Khana"],
-      // Add other states here similarly...
-    };
-
-    function loadLgas() {
-      const stateSel = document.getElementById("State").value;
-      const lgaSel = document.getElementById("LGA");
-      lgaSel.innerHTML = '<option value="">Select LGA</option>';
-      
-      if (lgaData[stateSel]) {
-        lgaData[stateSel].forEach(lga => {
-          let opt = document.createElement("option");
-          opt.value = lga;
-          opt.textContent = lga;
-          lgaSel.appendChild(opt);
+          const head = document.getElementById('tHead');
+          const body = document.getElementById('tBody');
+          head.innerHTML = "<tr>" + Object.keys(data[0]).map(k => `<th>${k}</th>`).join('') + "</tr>";
+          body.innerHTML = data.map(row => "<tr>" + Object.values(row).map(v => `<td>${v}</td>`).join('') + "</tr>").join('');
+          document.getElementById('tableBox').style.display = "block";
         });
-      } else if (stateSel !== "") {
-          // Fallback if state isn't in my shortened list above
-          let opt = document.createElement("option");
-          opt.value = "Other";
-          opt.textContent = "LGA Data Pending...";
-          lgaSel.appendChild(opt);
-      }
-    }
+    });
   </script>
 </body>
 </html>
+
+```
+Would you like me to explain how to secure this form so only you can view the data table?
