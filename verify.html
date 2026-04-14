@@ -3,36 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Center - Records</title>
+  <title>Data Center - AfriFUND</title>
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; padding: 0; background: #f9f9f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { margin: 0; padding: 0; background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+    
+    .menu-container { position: fixed; top: 10px; right: 10px; z-index: 1000; }
+    .dots { cursor: pointer; width: 35px; height: 35px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .dots div { width: 4px; height: 4px; background: #052; border-radius: 50%; margin: 2px 0; }
+    
+    .dropdown { display: none; position: absolute; top: 45px; right: 0; background: white; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px; min-width: 160px; overflow: hidden; }
+    .dropdown a { display: block; padding: 12px 20px; text-decoration: none; color: #333; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+    .dropdown a:hover { background: #f9f9f9; color: #052; }
 
-    /* MENU STYLE */
-    .menu-container { position: fixed; top: 15px; right: 15px; z-index: 1000; }
-    .dots { cursor: pointer; width: 35px; height: 30px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-    .dots div { width: 5px; height: 5px; background: #052; border-radius: 50%; }
-    .dropdown { display: none; position: absolute; top: 40px; right: 0; background: white; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 5px; min-width: 150px; }
-    .dropdown a { display: block; padding: 12px; text-decoration: none; color: #333; border-bottom: 1px solid #eee; }
-    .dropdown a:hover { background: #f2f2f2; }
-
-    /* MAIN SECTION */
     #records { padding: 20px; max-width: 1200px; margin: auto; text-align: center; }
-    h2 { color: #052; margin-top: 50px; font-weight: 800; text-transform: uppercase; }
+    h2 { color: #052; margin-top: 40px; font-size: 24px; text-transform: uppercase; }
 
-    /* LOADER */
-    .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #052; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 40px auto; display: none; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #052; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 40px auto; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* TABLE STYLE */
-    .table-container { width: 100%; overflow-x: auto; margin-top: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: white; }
-    table { border-collapse: collapse; width: 100%; min-width: 900px; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 14px; }
-    th { background: #052; color: white; text-transform: uppercase; position: sticky; top: 0; }
-    tr:nth-child(even) { background-color: #f2f2f2; }
-    tr:hover { background-color: #e9f5e9; }
-
-    #result { color: #d9534f; font-weight: bold; margin-top: 20px; }
+    .table-responsive { width: 100%; overflow-x: auto; margin-top: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    table { border-collapse: collapse; width: 100%; min-width: 1000px; }
+    th, td { border: 1px solid #eee; padding: 15px; text-align: left; font-size: 13px; }
+    th { background: #052; color: white; font-weight: 600; position: sticky; top: 0; }
+    tr:nth-child(even) { background-color: #fafafa; }
+    tr:hover { background-color: #f1f8f1; }
+    
+    #result { color: #d9534f; margin-top: 20px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -42,9 +39,9 @@
     <div></div><div></div><div></div>
   </div>
   <div class="dropdown" id="menuDropdown">
-    <a href="index.html">Dashboard</a>
-    <a href="javascript:location.reload()">Refresh Data</a>
-    <a href="#">Settings</a>
+    <a href="index.html">Register New</a>
+    <a href="javascript:location.reload()">Refresh Table</a>
+    <a href="#">Export Data</a>
   </div>
 </div>
 
@@ -52,72 +49,72 @@
   <h2>AfriFUND - Application Database</h2>
   
   <div id="loader" class="spinner"></div>
-
-  <div id="tableWrapper" class="table-container"></div>
-
+  <div class="table-responsive" id="tableContainer"></div>
   <p id="result"></p>
 </div>
 
 <script>
-  // YOUR UPDATED LINK
-  const scriptURL = "https://script.google.com/macros/s/AKfycbwntHf0XWdWNJDxWl8S5o6D8lrq50xicW1HF28o-0nJhtpdSUao1QsHRLCWIXUzo-xs/exec";
+  // YOUR NEW URL
+  const scriptURL = "https://script.google.com/macros/s/AKfycbwvvzigeVgcuiao6UyPC8w-MhCHg7MS9zFwEaKrqr98_Et5v1znYr8PONNNQCyWMzSz/exec";
 
   function toggleMenu() {
     const dropdown = document.getElementById('menuDropdown');
     dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
   }
 
-  // Close menu on outside click
   window.onclick = function(e) {
     if (!e.target.closest('.menu-container')) {
       document.getElementById('menuDropdown').style.display = "none";
     }
   };
 
-  // Fetch data automatically when page loads
   window.onload = fetchRecords;
 
   function fetchRecords() {
     const loader = document.getElementById("loader");
-    const wrapper = document.getElementById("tableWrapper");
+    const container = document.getElementById("tableContainer");
     const result = document.getElementById("result");
 
     loader.style.display = "block";
     result.innerText = "";
 
     fetch(scriptURL)
-      .then(res => res.json())
-      .then(data => {
-        if (!data || data.length === 0) {
-          wrapper.innerHTML = "<p style='padding:20px;'>No records found in the spreadsheet.</p>";
-          return;
-        }
+      .then(res => res.text()) // Fetch as text first to handle Google's redirect
+      .then(text => {
+        try {
+          const data = JSON.parse(text);
+          
+          if (!data || data.length === 0) {
+            container.innerHTML = "<p style='padding:40px;'>No records found in the spreadsheet.</p>";
+            return;
+          }
 
-        // Generate Table
-        let headers = Object.keys(data[0]);
-        let html = "<table><thead><tr><th>SN</th>";
-        
-        // Headers
-        headers.forEach(h => {
-          html += `<th>${h}</th>`;
-        });
-        html += "</tr></thead><tbody>";
-
-        // Body Rows
-        data.forEach((row, i) => {
-          html += `<tr><td>${i + 1}</td>`; // Serial Number
+          let headers = Object.keys(data[0]);
+          let html = "<table><thead><tr><th>SN</th>";
+          
           headers.forEach(h => {
-            html += `<td>${row[h] || ""}</td>`;
+            html += `<th>${h}</th>`;
           });
-          html += "</tr>";
-        });
+          html += "</tr></thead><tbody>";
 
-        html += "</tbody></table>";
-        wrapper.innerHTML = html;
+          data.forEach((row, i) => {
+            html += `<tr><td>${i + 1}</td>`;
+            headers.forEach(h => {
+              html += `<td>${row[h] !== undefined ? row[h] : ""}</td>`;
+            });
+            html += "</tr>";
+          });
+
+          html += "</tbody></table>";
+          container.innerHTML = html;
+        } catch (e) {
+          console.error("Parsing error:", e);
+          result.innerText = "❌ Error: Invalid data format. Check your Script Deployment.";
+        }
       })
       .catch(err => {
-        console.error(err);
-        result.innerText = "❌ Error: Could not load data. Ensure the Google Script is deployed as 'Anyone'.";
+        console.error("Fetch error:", err);
+        result.innerText = "❌ Error: Could not connect to the database. Ensure the script is deployed as 'Anyone'.";
       })
       .finally(() => {
         loader.style.display = "none";
