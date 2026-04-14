@@ -138,18 +138,25 @@ const stateSelect = document.getElementById("State");
 const lgaSelect = document.getElementById("LGA");
 
 // Load States
-fetch("https://nigerian-states-info.herokuapp.com/api/v1/states")
-.then(res => res.json())
-.then(data => {
-  stateSelect.innerHTML = '<option value="">Select State</option>';
-  data.data.forEach(state => {
-    let opt = document.createElement("option");
-    opt.value = state.name;
-    opt.textContent = state.name;
-    stateSelect.appendChild(opt);
-  });
-});
 
+// ================== STATIC STATES ==================
+const states = [
+"Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue",
+"Borno","Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","Gombe",
+"Imo","Jigawa","Kaduna","Kano","Katsina","Kebbi","Kogi","Kwara",
+"Lagos","Nasarawa","Niger","Ogun","Ondo","Osun","Oyo","Plateau",
+"Rivers","Sokoto","Taraba","Yobe","Zamfara","FCT"
+];
+
+stateSelect.innerHTML = '<option value="">Select State</option>';
+
+states.forEach(state => {
+  let opt = document.createElement("option");
+  opt.value = state;
+  opt.textContent = state;
+  stateSelect.appendChild(opt);
+});
+  
 // Load LGAs
 stateSelect.addEventListener("change", () => {
   const state = stateSelect.value;
