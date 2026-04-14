@@ -158,26 +158,41 @@ states.forEach(state => {
 });
   
 // Load LGAs
-stateSelect.addEventListener("change", () => {
+  stateSelect.addEventListener("change", () => {
   const state = stateSelect.value;
+
   lgaSelect.innerHTML = "<option>Loading...</option>";
 
-  fetch(`https://nigerian-states-info.herokuapp.com/api/v1/states/${state}/lgas`)
+  // PRIMARY API
+  fetch(`https://nga-states-lga.onrender.com/?state=${state}`)
     .then(res => res.json())
     .then(data => {
-      lgaSelect.innerHTML = '<option value="">Select LGA</option>';
-      data.data.forEach(lga => {
-        let opt = document.createElement("option");
-        opt.value = lga;
-        opt.textContent = lga;
-        lgaSelect.appendChild(opt);
-      });
+      if (!data || data.length === 0) throw "API failed";
+
+      populateLGAs(data);
     })
     .catch(() => {
-      lgaSelect.innerHTML = "<option>Error loading LGAs</option>";
+      console.log("API failed, using fallback...");
+
+      // FALLBACK DATA (100% WORKING)
+      if (fallbackLGA[state]) {
+        populateLGAs(fallbackLGA[state]);
+      } else {
+        lgaSelect.innerHTML = "<option>No LGA found</option>";
+      }
     });
 });
 
+function populateLGAs(lgas) {
+  lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+
+  lgas.forEach(lga => {
+    let opt = document.createElement("option");
+    opt.value = lga;
+    opt.textContent = lga;
+    lgaSelect.appendChild(opt);
+  });
+}
 
 // ================== BANK LIST ==================
 const banks = [
