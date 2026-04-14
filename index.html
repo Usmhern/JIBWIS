@@ -1,83 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AfriFUND</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" type="image/jpg">
+  <title>AfriFUND</title>
 
-<style>
-body {
-  font-family: Arial;
-  background: linear-gradient(#dbf9db,#fff);
-  padding:20px;
-  display:flex;
-  justify-content:center;
-}
-.container {
-  width:100%;
-  max-width:400px;
-}
-input, select {
-  width:100%;
-  padding:10px;
-  margin-bottom:12px;
-  border:none;
-  border-bottom:1px solid #ccc;
-}
-button {
-  width:100%;
-  padding:12px;
-  background:#052;
-  color:white;
-  border:none;
-  border-radius:10px;
-}
-</style>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+      background: linear-gradient(to top,#dbf9db,#fff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .container2 { background: transparent; padding: 1rem; width: 100%; max-width: 400px; }
+    .input-group, .input-groupE { margin-bottom: 1rem; }
+    .input-group label, .input-groupE label {
+      display: block; font-weight:bold; color:black; margin-bottom: 5px; font-size: 14px;
+    }
+    .input-group input, .input-group select, .input-groupE input {
+      width: 100%; padding: 0.5rem; border-radius: 5px; border: none;
+      background: transparent; border-bottom: 1px solid #bbb; font-size: 14px; outline: none;
+    }
+    .register-btn {
+      width: 100%; padding: 0.7rem; border: 1px solid #fff;
+      margin-top: 10px; border-radius: 15px; font-weight: bold;
+      cursor: pointer;
+      background: #052; color: white;
+    }
+
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    .blinking { animation: blink 1s infinite; }
+    #timer { font-size: 12px; text-align:center; color: red; margin-bottom: 10px; font-family: monospace; }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
-<h2>AfriFUND Registration</h2>
+<div class="container2">
+<center><img src="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" width="100"></center>
+<center><b><span style="color:navy;font-size:40px;font-family:impact;">Afri</span><span style="color:black;font-size:45px;">FUND</span></b></center>
+<center><b><i style="color:green;font-size:15px;font-family:monospace;">For Nigerians...</i></b></center>
+
+<div id="timer">SUBMISSION PORTAL ACTIVE</div>
 
 <form id="myForm">
 
-<input type="text" name="Name" placeholder="Full Name" required>
+<div class="input-group">
+<label>Your Name</label>
+<input type="text" name="Name" required>
+</div>
 
+<div class="input-group">
+<label>Date Of Birth</label>
 <input type="date" name="Date of Birth" required>
+</div>
 
-<input type="text" name="Phone Number" pattern="\d{11}" placeholder="08012345678" required>
+<div class="input-group">
+<label>Phone Number</label>
+<input type="text" name="Phone Number" pattern="\d{11}" required>
+</div>
 
+<div class="input-groupE">
+<label>Email</label>
 <input type="email" name="Email" required>
+</div>
 
-<input type="text" name="NIN" pattern="\d{11}" placeholder="NIN" required>
+<div class="input-group">
+<label>NIN</label>
+<input type="text" name="NIN" pattern="\d{11}" required>
+</div>
 
-<select id="stateSelect" name="State" required>
-<option value="">Loading States...</option>
+<div class="input-group">
+<label>State</label>
+<select id="State" name="State" required></select>
+</div>
+
+<div class="input-group">
+<label>LGA</label>
+<select id="LGA" name="LGA" required>
+<option>Select State First</option>
 </select>
+</div>
 
-<select id="lgaSelect" name="LGA" required>
-<option value="">Select State First</option>
-</select>
+<div class="input-group">
+<label>Account Number</label>
+<input type="text" name="Account Number" pattern="\d{10}" required>
+</div>
 
-<input type="text" name="Account Number" pattern="\d{10}" placeholder="Account Number" required>
+<div class="input-group">
+<label>Select Your Bank</label>
+<select name="Bank" id="bankSelect" required></select>
+</div>
 
-<select id="bankSelect" name="Bank" required></select>
-
-<button type="submit">Submit Registration</button>
+<button class="register-btn" id="submitBtn">Submit Registration</button>
 
 </form>
 </div>
 
 <script>
-const scriptURL = "YOUR_GOOGLE_SCRIPT_URL";
-const form = document.getElementById("myForm");
+const scriptURL = 'YOUR_GOOGLE_SCRIPT_URL';
+const form = document.getElementById('myForm');
+const submitBtn = document.getElementById('submitBtn');
 
-// =======================
-// SUBMIT FORM
-// =======================
-form.addEventListener("submit", e => {
+// ================== SUBMIT ==================
+form.addEventListener('submit', e => {
   e.preventDefault();
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = "Uploading...";
+  submitBtn.classList.add('blinking');
 
   fetch(scriptURL, { method: 'POST', body: new FormData(form)})
     .then(res => res.text())
@@ -89,41 +124,41 @@ form.addEventListener("submit", e => {
         form.reset();
       }
     })
-    .catch(err => alert("Error: " + err));
+    .catch(error => alert("Error: " + error.message))
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = "Submit Registration";
+      submitBtn.classList.remove('blinking');
+    });
 });
 
 
-// =======================
-// LOAD STATES + LGAs API
-// =======================
-const stateSelect = document.getElementById("stateSelect");
-const lgaSelect = document.getElementById("lgaSelect");
+// ================== STATES + LGAs API ==================
+const stateSelect = document.getElementById("State");
+const lgaSelect = document.getElementById("LGA");
 
-// Fetch all states
+// Load States
 fetch("https://nigerian-states-info.herokuapp.com/api/v1/states")
-  .then(res => res.json())
-  .then(data => {
-    stateSelect.innerHTML = '<option value="">Select State</option>';
-    
-    data.data.forEach(state => {
-      let opt = document.createElement("option");
-      opt.value = state.name;
-      opt.textContent = state.name;
-      stateSelect.appendChild(opt);
-    });
+.then(res => res.json())
+.then(data => {
+  stateSelect.innerHTML = '<option value="">Select State</option>';
+  data.data.forEach(state => {
+    let opt = document.createElement("option");
+    opt.value = state.name;
+    opt.textContent = state.name;
+    stateSelect.appendChild(opt);
   });
+});
 
-// When state changes → load LGAs
+// Load LGAs
 stateSelect.addEventListener("change", () => {
-  const selectedState = stateSelect.value;
+  const state = stateSelect.value;
+  lgaSelect.innerHTML = "<option>Loading...</option>";
 
-  lgaSelect.innerHTML = '<option>Loading LGAs...</option>';
-
-  fetch(`https://nigerian-states-info.herokuapp.com/api/v1/states/${selectedState}/lgas`)
+  fetch(`https://nigerian-states-info.herokuapp.com/api/v1/states/${state}/lgas`)
     .then(res => res.json())
     .then(data => {
       lgaSelect.innerHTML = '<option value="">Select LGA</option>';
-
       data.data.forEach(lga => {
         let opt = document.createElement("option");
         opt.value = lga;
@@ -132,14 +167,12 @@ stateSelect.addEventListener("change", () => {
       });
     })
     .catch(() => {
-      lgaSelect.innerHTML = '<option>Error loading LGAs</option>';
+      lgaSelect.innerHTML = "<option>Error loading LGAs</option>";
     });
 });
 
 
-// =======================
-// FULL BANK LIST
-// =======================
+// ================== BANK LIST ==================
 const banks = [
 "Access Bank","Citibank","Ecobank","Fidelity Bank","First Bank",
 "FCMB","Globus Bank","GTBank","Heritage Bank","Jaiz Bank",
