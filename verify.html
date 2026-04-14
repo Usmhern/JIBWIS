@@ -3,124 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Center - AfriFUND</title>
+  <title>Data Center - Manage Records</title>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 0; background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { margin: 0; padding: 20px; background: #f0f2f5; color: #333; }
     
-    .menu-container { position: fixed; top: 10px; right: 10px; z-index: 1000; }
-    .dots { cursor: pointer; width: 35px; height: 35px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-    .dots div { width: 4px; height: 4px; background: #052; border-radius: 50%; margin: 2px 0; }
-    
-    .dropdown { display: none; position: absolute; top: 45px; right: 0; background: white; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px; min-width: 160px; overflow: hidden; }
-    .dropdown a { display: block; padding: 12px 20px; text-decoration: none; color: #333; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
-    .dropdown a:hover { background: #f9f9f9; color: #052; }
+    h2 { color: #052; text-align: center; margin-top: 40px; }
 
-    #records { padding: 20px; max-width: 1200px; margin: auto; text-align: center; }
-    h2 { color: #052; margin-top: 40px; font-size: 24px; text-transform: uppercase; }
-
-    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #052; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 40px auto; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    .table-responsive { width: 100%; overflow-x: auto; margin-top: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    table { border-collapse: collapse; width: 100%; min-width: 1000px; }
-    th, td { border: 1px solid #eee; padding: 15px; text-align: left; font-size: 13px; }
-    th { background: #052; color: white; font-weight: 600; position: sticky; top: 0; }
-    tr:nth-child(even) { background-color: #fafafa; }
+    /* Table Styling */
+    .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+    th, td { padding: 12px 15px; border: 1px solid #eee; text-align: left; font-size: 13px; }
+    th { background: #052; color: white; position: sticky; top: 0; }
     tr:hover { background-color: #f1f8f1; }
-    
-    #result { color: #d9534f; margin-top: 20px; font-weight: bold; }
+
+    /* Action Buttons */
+    .btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+    .btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+    .btn-edit:hover { background: #e68a00; }
+    .btn-delete:hover { background: #c9302c; }
+
+    /* Modal Styling */
+    #editModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+    .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 10px; }
+    .modal-content h3 { margin-top: 0; color: #052; }
+    .modal-content input { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
+    .modal-actions { display: flex; justify-content: space-between; margin-top: 15px; }
+    .save-btn { background: #052; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    .cancel-btn { background: #777; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #052; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-<div class="menu-container">
-  <div class="dots" onclick="toggleMenu()">
-    <div></div><div></div><div></div>
-  </div>
-  <div class="dropdown" id="menuDropdown">
-    <a href="index.html">Register New</a>
-    <a href="javascript:location.reload()">Refresh Table</a>
-    <a href="#">Export Data</a>
-  </div>
-</div>
-
-<div id="records">
-  <h2>AfriFUND - Application Database</h2>
-  
+  <h2>AfriFUND Application Database</h2>
   <div id="loader" class="spinner"></div>
   <div class="table-responsive" id="tableContainer"></div>
-  <p id="result"></p>
-</div>
 
-<script>
-  // YOUR NEW URL
-  const scriptURL = "https://script.google.com/macros/s/AKfycbwvvzigeVgcuiao6UyPC8w-MhCHg7MS9zFwEaKrqr98_Et5v1znYr8PONNNQCyWMzSz/exec";
+  <div id="editModal">
+    <div class="modal-content">
+      <h3>Edit Record</h3>
+      <form id="editForm">
+        <input type="hidden" name="rowNumber" id="editRowNumber">
+        <input type="hidden" name="action" value="edit">
+        <label>Name</label><input type="text" name="Name" id="editName" required>
+        <label>NIN</label><input type="text" name="NIN" id="editNIN" required>
+        <label>Phone Number</label><input type="text" name="Phone Number" id="editPhone" required>
+        <label>Email</label><input type="email" name="Email" id="editEmail" required>
+        <div class="modal-actions">
+          <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="save-btn" id="saveBtn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  function toggleMenu() {
-    const dropdown = document.getElementById('menuDropdown');
-    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-  }
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbw7wt1Rok24XHEoRUJ1ruw9qnEBCtd_LldUFX-Zo-0toAFNoJWL27MgVTiFdg1MOk3t/exec";
 
-  window.onclick = function(e) {
-    if (!e.target.closest('.menu-container')) {
-      document.getElementById('menuDropdown').style.display = "none";
-    }
-  };
+    window.onload = fetchRecords;
 
-  window.onload = fetchRecords;
-
-  function fetchRecords() {
-    const loader = document.getElementById("loader");
-    const container = document.getElementById("tableContainer");
-    const result = document.getElementById("result");
-
-    loader.style.display = "block";
-    result.innerText = "";
-
-    fetch(scriptURL)
-      .then(res => res.text()) // Fetch as text first to handle Google's redirect
-      .then(text => {
-        try {
-          const data = JSON.parse(text);
-          
-          if (!data || data.length === 0) {
-            container.innerHTML = "<p style='padding:40px;'>No records found in the spreadsheet.</p>";
+    function fetchRecords() {
+      const loader = document.getElementById("loader");
+      loader.style.display = "block";
+      fetch(scriptURL)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length === 0) {
+            document.getElementById("tableContainer").innerHTML = "<p>No records found.</p>";
             return;
           }
-
-          let headers = Object.keys(data[0]);
-          let html = "<table><thead><tr><th>SN</th>";
-          
-          headers.forEach(h => {
-            html += `<th>${h}</th>`;
-          });
-          html += "</tr></thead><tbody>";
+          let headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
+          let html = `<table><thead><tr><th>SN</th>`;
+          headers.forEach(h => html += `<th>${h}</th>`);
+          html += `<th>Actions</th></tr></thead><tbody>`;
 
           data.forEach((row, i) => {
-            html += `<tr><td>${i + 1}</td>`;
-            headers.forEach(h => {
-              html += `<td>${row[h] !== undefined ? row[h] : ""}</td>`;
-            });
-            html += "</tr>";
+            html += `<tr><td>${i+1}</td>`;
+            headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
+            html += `<td>
+              <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row)})'>Edit</button>
+              <button class="btn-delete" onclick="deleteRow(${row.rowNumber})">Delete</button>
+            </td></tr>`;
           });
+          html += `</tbody></table>`;
+          document.getElementById("tableContainer").innerHTML = html;
+        })
+        .finally(() => loader.style.display = "none");
+    }
 
-          html += "</tbody></table>";
-          container.innerHTML = html;
-        } catch (e) {
-          console.error("Parsing error:", e);
-          result.innerText = "❌ Error: Invalid data format. Check your Script Deployment.";
-        }
-      })
-      .catch(err => {
-        console.error("Fetch error:", err);
-        result.innerText = "❌ Error: Could not connect to the database. Ensure the script is deployed as 'Anyone'.";
-      })
-      .finally(() => {
-        loader.style.display = "none";
-      });
-  }
-</script>
+    function deleteRow(rowNum) {
+      if (confirm("Are you sure? This will remove the record from the Google Sheet forever.")) {
+        const fd = new FormData();
+        fd.append("action", "delete");
+        fd.append("rowNumber", rowNum);
 
+        fetch(scriptURL, { method: "POST", body: fd })
+          .then(res => res.text())
+          .then(msg => {
+            alert(msg);
+            fetchRecords();
+          });
+      }
+    }
+
+    function openEditModal(row) {
+      document.getElementById("editRowNumber").value = row.rowNumber;
+      document.getElementById("editName").value = row["Name"] || "";
+      document.getElementById("editNIN").value = row["NIN"] || "";
+      document.getElementById("editPhone").value = row["Phone Number"] || "";
+      document.getElementById("editEmail").value = row["Email"] || "";
+      document.getElementById("editModal").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("editModal").style.display = "none";
+    }
+
+    document.getElementById("editForm").onsubmit = function(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.innerText = "Saving...";
+      saveBtn.disabled = true;
+
+      fetch(scriptURL, { method: "POST", body: new FormData(this) })
+        .then(res => res.text())
+        .then(msg => {
+          alert(msg);
+          closeModal();
+          fetchRecords();
+        })
+        .finally(() => {
+          saveBtn.innerText = "Save Changes";
+          saveBtn.disabled = false;
+        });
+    };
+  </script>
 </body>
 </html>
