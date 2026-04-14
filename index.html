@@ -1,237 +1,164 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" href="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" type="image/jpg">
-  <title>AfriFUND</title>
-  <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body {
-      background: linear-gradient(to top,#dbf9db,#fff);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 0;
-      padding: 20px;
-    }
-    .container2 { background: transparent; padding: 1rem; width: 100%; max-width: 400px; }
-    .input-group, .input-groupE { margin-bottom: 1rem; }
-    .input-group label, .input-groupE label { display: block; font-weight:bold; color:black; margin-bottom: 5px; font-size: 14px; }
-    .input-group input, .input-group select, .input-groupE input {
-      width: 100%; padding: 0.5rem; border-radius: 5px; border: none; background: transparent; border-bottom: 1px solid #bbb; font-size: 14px; outline: none;
-    }
-    .register-btn, .fetch-btn {
-      width: 100%; padding: 0.7rem; border: 1px solid #fff; margin-top: 10px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s;
-    }
-    .register-btn { background: #052; color: white; }
-    .fetch-btn { background: #004080; color: white; margin-top: 20px; }
-    
-    /* Table Styling */
-    .data-container { width: 100%; max-width: 95%; overflow-x: auto; margin-top: 30px; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; white-space: nowrap; }
-    th { background-color: #052; color: white; position: sticky; top: 0; }
-    tr:nth-child(even) { background-color: #f9f9f9; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AfriFUND</title>
 
-    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-    .blinking { animation: blink 1s infinite; }
-    #timer { font-size: 12px; text-align:center; color: red; margin-bottom: 10px; font-family: monospace; }
-  </style>
+<style>
+body {
+  font-family: Arial;
+  background: linear-gradient(#dbf9db,#fff);
+  padding:20px;
+  display:flex;
+  justify-content:center;
+}
+.container {
+  width:100%;
+  max-width:400px;
+}
+input, select {
+  width:100%;
+  padding:10px;
+  margin-bottom:12px;
+  border:none;
+  border-bottom:1px solid #ccc;
+}
+button {
+  width:100%;
+  padding:12px;
+  background:#052;
+  color:white;
+  border:none;
+  border-radius:10px;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="container2">
-    <center><img src="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" alt="Logo" width="100"></center>
-    <center><b><span style="color:navy;font-size:40px; font-family:impact;">Afri</span><span style="color:black; font-size:45px;">FUND</span></b></center>
-    <center><b><i style="color:green; font-size:15px; font-family:monospace;">For Nigerians...</i></b></center>
-    
-    <div id="timer">SUBMISSION PORTAL ACTIVE</div>
+<div class="container">
+<h2>AfriFUND Registration</h2>
 
-    <form id="myForm">
-      <div class="input-group">
-        <label>Your Name<span style="color:red">*</span></label>
-        <input type="text" name="Name" required />
-      </div>
-      <div class="input-group">
-        <label>Date Of Birth<span style="color:red">*</span></label>
-        <input type="date" name="Date of Birth" required />
-      </div>
-      <div class="input-group">
-        <label>Phone Number<span style="color:red">*</span></label>
-        <input type="text" name="Phone Number" pattern="\d{11}" placeholder="08012345678" required />
-      </div>
-      <div class="input-groupE">
-        <label>Email<span style="color:red">*</span></label>
-        <input type="email" name="Email" required style="text-transform: lowercase;" />
-      </div>
-      <div class="input-group">
-        <label>NIN<span style="color:red">*</span></label>
-        <input type="text" name="NIN" minlength="11" maxlength="11" pattern="\d{11}" required />
-      </div>
-      
-      <div class="input-group">
-        <label>State<span style="color:red">*</span></label>
-        <select id="State" name="State" required onchange="loadLgas()">
-          <option value="">Select State</option>
-          <option value="Abia">Abia</option><option value="Adamawa">Adamawa</option>
-          <option value="Akwa Ibom">Akwa Ibom</option><option value="Anambra">Anambra</option>
-          <option value="Bauchi">Bauchi</option><option value="Bayelsa">Bayelsa</option>
-          <option value="Benue">Benue</option><option value="Borno">Borno</option>
-          <option value="Cross River">Cross River</option><option value="Delta">Delta</option>
-          <option value="Ebonyi">Ebonyi</option><option value="Edo">Edo</option>
-          <option value="Ekiti">Ekiti</option><option value="Enugu">Enugu</option>
-          <option value="Gombe">Gombe</option><option value="Imo">Imo</option>
-          <option value="Jigawa">Jigawa</option><option value="Kaduna">Kaduna</option>
-          <option value="Kano">Kano</option><option value="Katsina">Katsina</option>
-          <option value="Kebbi">Kebbi</option><option value="Kogi">Kogi</option>
-          <option value="Kwara">Kwara</option><option value="Lagos">Lagos</option>
-          <option value="Nasarawa">Nasarawa</option><option value="Niger">Niger</option>
-          <option value="Ogun">Ogun</option><option value="Ondo">Ondo</option>
-          <option value="Osun">Osun</option><option value="Oyo">Oyo</option>
-          <option value="Plateau">Plateau</option><option value="Rivers">Rivers</option>
-          <option value="Sokoto">Sokoto</option><option value="Taraba">Taraba</option>
-          <option value="Yobe">Yobe</option><option value="Zamfara">Zamfara</option>
-          <option value="FCT">FCT</option>
-        </select>
-      </div>
+<form id="myForm">
 
-      <div class="input-group">
-        <label>LGA<span style="color:red">*</span></label>
-        <select id="LGA" name="LGA" required>
-          <option value="">Select LGA</option>
-        </select>
-      </div>
+<input type="text" name="Name" placeholder="Full Name" required>
 
-      <div class="input-group">
-        <label>Account Number<span style="color:red">*</span></label>
-        <input type="text" name="Account Number" maxlength="10" pattern="\d{10}" required />
-      </div>
+<input type="date" name="Date of Birth" required>
 
-      <div class="input-group">
-        <label>Select Your Bank<span style="color:red">*</span></label>
-        <select name="Bank" required>
-          <option value="">Select Bank</option>
-          <option value="Access">Access Bank</option>
-          <option value="FirstBank">First Bank</option>
-          <option value="Gtbank">GTBank</option>
-          <option value="Zenith">Zenith Bank</option>
-          <option value="Uba">UBA</option>
-        </select>
-      </div>
+<input type="text" name="Phone Number" pattern="\d{11}" placeholder="08012345678" required>
 
-      <button class="register-btn" id="submitBtn" type="submit">Submit Registration</button>
-    </form>
-    
-    <button class="fetch-btn" id="fetchBtn">View Submitted Table</button>
-  </div>
+<input type="email" name="Email" required>
 
-  <div class="data-container" id="dataContainer" style="display:none;">
-    <h3 style="text-align: center; color: #052;">Application Records</h3>
-    <table id="dataTable">
-      <thead><tr id="tableHeader"></tr></thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
+<input type="text" name="NIN" pattern="\d{11}" placeholder="NIN" required>
 
-  <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbymwKgIOx7Zfy_7ux3XNElKiFG0pRYl65isN-zRyuUeFRHLQhoThK8dfGqjZtsWoFHq/exec';
-    const form = document.getElementById('myForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const fetchBtn = document.getElementById('fetchBtn');
+<select id="stateSelect" name="State" required>
+<option value="">Loading States...</option>
+</select>
 
-    // 1. SUBMIT DATA TO SHEET
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = "Uploading...";
-      submitBtn.classList.add('blinking');
+<select id="lgaSelect" name="LGA" required>
+<option value="">Select State First</option>
+</select>
 
-      fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-        .then(response => {
-           alert("Application Submitted Successfully!");
-           form.reset();
-        })
-        .catch(error => alert("Submission Error: " + error.message))
-        .finally(() => {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = "Submit Registration";
-          submitBtn.classList.remove('blinking');
-        });
-    });
+<input type="text" name="Account Number" pattern="\d{10}" placeholder="Account Number" required>
 
-    // 2. FETCH DATA FROM SHEET
-    fetchBtn.addEventListener('click', () => {
-      fetchBtn.innerHTML = "Fetching Data...";
-      fetchBtn.disabled = true;
+<select id="bankSelect" name="Bank" required></select>
 
-      fetch(scriptURL)
-        .then(res => res.json())
-        .then(data => {
-          if (data.length === 0) {
-            alert("No data found in sheet.");
-            return;
-          }
-          const header = document.getElementById('tableHeader');
-          const body = document.getElementById('tableBody');
-          header.innerHTML = ""; body.innerHTML = "";
+<button type="submit">Submit Registration</button>
 
-          // Create Headers from the first object keys
-          Object.keys(data[0]).forEach(key => {
-            header.innerHTML += `<th>${key}</th>`;
-          });
+</form>
+</div>
 
-          // Create Rows
-          data.forEach(row => {
-            let tr = document.createElement('tr');
-            Object.values(row).forEach(val => {
-              let td = document.createElement('td');
-              td.textContent = val;
-              tr.appendChild(td);
-            });
-            body.appendChild(tr);
-          });
+<script>
+const scriptURL = "YOUR_GOOGLE_SCRIPT_URL";
+const form = document.getElementById("myForm");
 
-          document.getElementById('dataContainer').style.display = "block";
-          fetchBtn.innerHTML = "Refresh Table Data";
-          // Scroll to table
-          document.getElementById('dataContainer').scrollIntoView({ behavior: 'smooth' });
-        })
-        .catch(err => alert("Make sure your Google Script has a doGet() function and is deployed as 'Anyone'."))
-        .finally(() => fetchBtn.disabled = false);
-    });
+// =======================
+// SUBMIT FORM
+// =======================
+form.addEventListener("submit", e => {
+  e.preventDefault();
 
-    // 3. COMPLETE LGA LIST
-    const lgaData = {
-      "Abia": ["Aba North", "Aba South", "Arochukwu", "Bende", "Ikwuano", "Isiala Ngwa North", "Isiala Ngwa South", "Isuikwuato", "Obi Ngwa", "Ohafia", "Osisioma", "Ugwunagbo", "Ukwa East", "Ukwa West", "Umuahia North", "Umuahia South", "Umu Nneochi"],
-      "Lagos": ["Agege", "Alimosho", "Amuwo-Odofin", "Apapa", "Badagry", "Epe", "Eti-Osa", "Ibeju-Lekki", "Ifako-Ijaiye", "Ikeja", "Ikorodu", "Kosofe", "Lagos Island", "Lagos Mainland", "Mushin", "Ojo", "Oshodi-Isolo", "Shomolu", "Surulere"],
-      "Kano": ["Dala", "Fagge", "Gwale", "Kano Municipal", "Kumbotso", "Tarauni", "Nasarawa"],
-      "FCT": ["Abaji", "Bwari", "Gwagwalada", "Kuje", "Kwali", "Municipal Area Council"],
-      "Rivers": ["Port Harcourt", "Obio-Akpor", "Okrika", "Eleme", "Oyigbo", "Tai", "Gokana", "Khana"],
-      // Add other states here similarly...
-    };
-
-    function loadLgas() {
-      const stateSel = document.getElementById("State").value;
-      const lgaSel = document.getElementById("LGA");
-      lgaSel.innerHTML = '<option value="">Select LGA</option>';
-      
-      if (lgaData[stateSel]) {
-        lgaData[stateSel].forEach(lga => {
-          let opt = document.createElement("option");
-          opt.value = lga;
-          opt.textContent = lga;
-          lgaSel.appendChild(opt);
-        });
-      } else if (stateSel !== "") {
-          // Fallback if state isn't in my shortened list above
-          let opt = document.createElement("option");
-          opt.value = "Other";
-          opt.textContent = "LGA Data Pending...";
-          lgaSel.appendChild(opt);
+  fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+    .then(res => res.text())
+    .then(result => {
+      if (result === "Already Registered") {
+        alert("❌ Denied: This NIN is already registered.");
+      } else {
+        alert("✅ Registration Successful!");
+        form.reset();
       }
-    }
-  </script>
+    })
+    .catch(err => alert("Error: " + err));
+});
+
+
+// =======================
+// LOAD STATES + LGAs API
+// =======================
+const stateSelect = document.getElementById("stateSelect");
+const lgaSelect = document.getElementById("lgaSelect");
+
+// Fetch all states
+fetch("https://nigerian-states-info.herokuapp.com/api/v1/states")
+  .then(res => res.json())
+  .then(data => {
+    stateSelect.innerHTML = '<option value="">Select State</option>';
+    
+    data.data.forEach(state => {
+      let opt = document.createElement("option");
+      opt.value = state.name;
+      opt.textContent = state.name;
+      stateSelect.appendChild(opt);
+    });
+  });
+
+// When state changes → load LGAs
+stateSelect.addEventListener("change", () => {
+  const selectedState = stateSelect.value;
+
+  lgaSelect.innerHTML = '<option>Loading LGAs...</option>';
+
+  fetch(`https://nigerian-states-info.herokuapp.com/api/v1/states/${selectedState}/lgas`)
+    .then(res => res.json())
+    .then(data => {
+      lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+
+      data.data.forEach(lga => {
+        let opt = document.createElement("option");
+        opt.value = lga;
+        opt.textContent = lga;
+        lgaSelect.appendChild(opt);
+      });
+    })
+    .catch(() => {
+      lgaSelect.innerHTML = '<option>Error loading LGAs</option>';
+    });
+});
+
+
+// =======================
+// FULL BANK LIST
+// =======================
+const banks = [
+"Access Bank","Citibank","Ecobank","Fidelity Bank","First Bank",
+"FCMB","Globus Bank","GTBank","Heritage Bank","Jaiz Bank",
+"Keystone Bank","Kuda Bank","Moniepoint","Opay","Parallex Bank",
+"Polaris Bank","Providus Bank","Stanbic IBTC","Standard Chartered",
+"Sterling Bank","Suntrust Bank","TAJ Bank","Union Bank","UBA",
+"Unity Bank","Wema Bank","Zenith Bank"
+];
+
+const bankSelect = document.getElementById("bankSelect");
+bankSelect.innerHTML = '<option value="">Select Bank</option>';
+
+banks.forEach(bank => {
+  let opt = document.createElement("option");
+  opt.value = bank;
+  opt.textContent = bank;
+  bankSelect.appendChild(opt);
+});
+</script>
+
 </body>
 </html>
