@@ -267,6 +267,21 @@ editForm.onsubmit = function(e) {
     })
     .finally(() => saveBtn.innerText = "Save");
 };
+
+  function formatDate(value) {
+  if (!value) return "";
+
+  let date = new Date(value);
+
+  if (isNaN(date)) return value; // if not a valid date, return as-is
+
+  let day = String(date.getDate()).padStart(2, '0');
+  let month = String(date.getMonth() + 1).padStart(2, '0');
+  let year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+    }
+  
 async function downloadPDF() {
   const { jsPDF } = window.jspdf;
 
@@ -370,7 +385,14 @@ async function downloadPDF() {
     headers.forEach((h, i) => {
       pdf.rect(x, y, colWidths[i + 1], rowHeight);
 
-      let text = String(row[h] || "");
+      let value = row[h];
+
+// ✅ Format ONLY Date of Birth column
+if (h.toLowerCase().includes("date")) {
+  value = formatDate(value);
+}
+
+let text = String(value || "");
 
       // truncate nicely
       if (text.length > 25) text = text.substring(0, 25) + "...";
