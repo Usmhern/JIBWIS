@@ -165,7 +165,7 @@
     const fetchBtn = document.getElementById('fetchBtn');
 
     // SUBMIT DATA
-    form.addEventListener('submit', function(e) {
+   /* form.addEventListener('submit', function(e) {
       e.preventDefault();
       submitBtn.disabled = true;
       submitBtn.classList.add('blinking');
@@ -182,7 +182,53 @@
         submitBtn.classList.remove('blinking');
         submitBtn.textContent = 'Submit';
       });
-    });
+    });*/
+
+    
+const scriptURL = "https://script.google.com/macros/s/AKfycbwlknDt8WbBA1ckvFjNXjf05_4iiEC9KOzq83_FRLpKVoEgwnf1TnBaXHoi0tuwlQFn/exec";
+
+// 🔥 CHECK STATUS
+async function checkStatus() {
+  const res = await fetch(scriptURL + "?settings=1");
+  const data = await res.json();
+
+  const box = document.getElementById("statusBox");
+
+  if (data.status === "Active") {
+    box.innerHTML = "🟢 Application is OPEN";
+    box.style.color = "green";
+  } else {
+    box.innerHTML = "🔴 Application is CLOSED";
+    box.style.color = "red";
+  }
+
+  return data.status;
+}
+
+// 🔥 FORM SUBMIT CONTROL
+document.getElementById("myForm").onsubmit = async function(e) {
+  e.preventDefault();
+
+  let status = await checkStatus();
+
+  if (status !== "Active") {
+    alert("Application is currently closed.");
+    return;
+  }
+
+  fetch(scriptURL, {
+    method: "POST",
+    body: new FormData(this)
+  })
+  .then(res => res.text())
+  .then(msg => {
+    alert(msg);
+    this.reset();
+  });
+};
+
+// run on load
+checkStatus();
 
     // FETCH DATA
     fetchBtn.addEventListener('click', function() {
