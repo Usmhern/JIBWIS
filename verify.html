@@ -92,7 +92,7 @@ tr:hover { background-color: #f1f8f1; }
 }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
-/* ===== SIDE NAVIGATION (ADDED) ===== */
+/* SIDEBAR */
 #menuBtn {
   position: fixed;
   top: 15px;
@@ -125,19 +125,16 @@ tr:hover { background-color: #f1f8f1; }
   color: white;
   text-decoration: none;
 }
+#sidebar a:hover { background: rgba(255,255,255,0.1); }
 
-#sidebar a:hover {
-  background: rgba(255,255,255,0.1);
-}
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR BUTTON -->
+<!-- SIDEBAR -->
 <div id="menuBtn" onclick="toggleSidebar()">⋮</div>
 
-<!-- SIDEBAR -->
 <div id="sidebar">
   <h3>Menu</h3>
   <a href="#">Applications Form</a>
@@ -171,7 +168,7 @@ tr:hover { background-color: #f1f8f1; }
 <div class="table-responsive" id="tableContainer"></div>
 <div class="pagination" id="pagination"></div>
 
-<!-- MODAL -->
+<!-- EDIT MODAL -->
 <div id="editModal">
   <div class="modal-content">
     <h3>Edit Record</h3>
@@ -253,7 +250,11 @@ function renderTable() {
   html += `<th>Actions</th></tr></thead><tbody>`;
 
   paginated.forEach((row, i) => {
-    html += `<tr><td>${start + i + 1}</td>`;
+    let sn = (rowsPerPage === "all")
+  ? (i + 1)
+  : (start + i + 1);
+
+html += `<tr><td>${sn}</td>`;
     headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
     html += `<td>
       <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row)})'>Edit</button>
@@ -333,7 +334,7 @@ function toggleSidebar() {
   sidebar.style.left = (sidebar.style.left === "0px") ? "-260px" : "0px";
 }
 
-/* AUTO REFRESH EVERY 5 SECONDS (ADDED) */
+/* AUTO REFRESH (5 SECONDS) */
 setInterval(() => {
   fetch(scriptURL)
     .then(res => res.json())
@@ -351,6 +352,134 @@ setInterval(() => {
     .catch(() => {});
 }, 5000);
 
+/* ===== YOUR ORIGINAL DOWNLOAD PDF LOGIC (UNCHANGED) ===== */
+function formatDate(value) {
+  if (!value) return "";
+  let date = new Date(value);
+  if (isNaN(date)) return value;
+  let day = String(date.getDate()).padStart(2, '0');
+  let month = String(date.getMonth() + 1).padStart(2, '0');
+  let year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+
+  let data = filteredData;
+  if (data.length === 0) {
+    alert("No data available to download.");
+    return;
+  }
+
+  let allHeaders = Object.keys(data[0]).filter(h => {
+    let key = h.toLowerCase();
+    return (
+      h !== "rowNumber" &&
+      key !== "timestamp" &&
+      key !== "email" &&
+      key !== "otp"
+    );
+  });
+
+  let headers = allHeaders.slice(1, -1);
+
+  const pdf = new jsPDF('l', 'mm', 'a4');
+
+  const pageWidth = 297;
+  const pageHeight = 210;
+  const margin = 10;
+
+  let y = margin;
+
+  pdf.setFontSize(14);
+  pdf.text("AfriFUND Application Records", pageWidth / 2, y, { align: "center" });
+  y += 8;
+
+  const searchValue = document.getElementById("searchInput").value;
+  if (searchValue) {
+    pdf.setFontSize(10);
+    pdf.text("Filter: " + searchValue, margin, y);
+    y += 6;
+  }
+
+  pdf.setFontSize(9);
+
+  let colWidths = [];
+  colWidths.push(10);
+
+  headers.forEach(h => {
+    if (h.toLowerCase().includes("name")) colWidths.push(60);
+    else if (h.toLowerCase().includes("email")) colWidths.push(85);
+    else if (h === "NIN") colWidths.push(35);
+    else if (h === "Phone Number") colWidths.push(30);
+    else colWidths.push(20);
+  });
+
+  let totalWidth = colWidths.reduce((a,b)=>a+b,0);
+  let scale = (297 - margin*2) / totalWidth;
+  colWidths = colWidths.map(w => w * scale);
+
+  const rowHeight = 7;
+
+  function drawHeader() {
+    let x = margin;
+    pdf.setFont(undefined, "bold");
+
+    pdf.rect(x, y, colWidths[0], rowHeight);
+    pdf.text("SN", x + 3, y + 5);
+    x += colWidths[0];
+
+    headers.forEach((h, i) => {
+      pdf.rect(x, y, colWidths[i+1], rowHeight);
+      pdf.text(h, x + 2, y + 5);
+      x += colWidths[i+1];
+    });
+
+    pdf.setFont(undefined, "normal");
+    y += rowHeight;
+  }
+
+  drawHeader();
+
+  data.forEach((row, index) => {
+    let x = margin;
+
+    if (y + rowHeight > pageHeight - margin) {
+      pdf.addPage();
+      y = margin;
+      drawHeader();
+    }
+
+    pdf.rect(x, y, colWidths[0], rowHeight);
+    pdf.text(String(index+1), x + 2, y + 5);
+    x += colWidths[0];
+
+    headers.forEach((h,i)=>{
+      pdf.rect(x, y, colWidths[i+1], rowHeight);
+
+      let value = row[h];
+
+      if (h.toLowerCase().includes("date")) {
+        value = formatDate(value);
+      }
+
+      let text = String(value || "");
+      let maxChars = Math.floor(colWidths[i+1] / 2.2);
+
+      if (text.length > maxChars) {
+        text = text.substring(0,maxChars) + "...";
+      }
+
+      pdf.text(text, x + 2, y + 5);
+      x += colWidths[i+1];
+    });
+
+    y += rowHeight;
+  });
+
+  pdf.save("AfriFUND_Records.pdf");
+}
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
