@@ -320,15 +320,28 @@ async function downloadPDF() {
 
   // ✅ SMART COLUMN WIDTHS
   let colWidths = [];
-  colWidths.push(10); // SN
+colWidths.push(10); // SN
 
-  headers.forEach(h => {
-    if (h.toLowerCase().includes("name")) colWidths.push(50);
-    else if (h === "NIN") colWidths.push(45);
-    else if (h === "Phone Number") colWidths.push(40);
-    else if (h === "Account Number") colWidths.push(40);
-    else colWidths.push(30);
-  });
+headers.forEach(h => {
+
+  // ✅ FORCE NAME COLUMN TO BE WIDER
+  if (h.toLowerCase().includes("name")) {
+    colWidths.push(70); // 🔥 BIG SPACE FOR NAMES
+  }
+  else if (h === "NIN") {
+    colWidths.push(40);
+  }
+  else if (h === "Phone Number") {
+    colWidths.push(35);
+  }
+  else if (h === "Account Number") {
+    colWidths.push(35);
+  }
+  else {
+    colWidths.push(25);
+  }
+
+});
 
   // Normalize
   let totalWidth = colWidths.reduce((a, b) => a + b, 0);
