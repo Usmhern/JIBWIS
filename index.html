@@ -31,9 +31,19 @@
   <div class="container2">
     <center><img src="https://st2.depositphotos.com/6962450/10591/i/950/depositphotos_105914406-stock-illustration-nigeria-coat-of-arms.jpg" alt="Nigeria Coat of Arms" width="100"></center>
     <center><b><span style="color:navy;font-size:40px; font-family:impact;">Afri</span><span style="color:black; font-size:45px;">FUND </span></b></center>
-    <center><b><span style="color:green; font-size:15px; font-family:monospace;"><i>For Nigerians...</i></span></b></center>
-    <br>
-    <div id="timer">PORTAL ACTIVE</div>
+    <center>
+  <b>
+    <span style="color:green; font-size:15px; font-family:monospace;">
+      <i>For Nigerians...</i>
+    </span>
+  </b>
+
+  <!-- 🔥 STATUS DISPLAY -->
+  <div id="statusBox"
+    style="margin-top:8px; font-weight:bold; font-size:14px;">
+    Checking system status...
+  </div>
+</center>
 
     <form id="myForm">
       <div class="input-group">
@@ -185,11 +195,11 @@
     });*/
 
     
-const scriptURL = "https://script.google.com/macros/s/AKfycbwlknDt8WbBA1ckvFjNXjf05_4iiEC9KOzq83_FRLpKVoEgwnf1TnBaXHoi0tuwlQFn/exec";
+const scriptURL2 = "https://script.google.com/macros/s/AKfycbwlknDt8WbBA1ckvFjNXjf05_4iiEC9KOzq83_FRLpKVoEgwnf1TnBaXHoi0tuwlQFn/exec";
 
 // 🔥 CHECK STATUS
 async function checkStatus() {
-  const res = await fetch(scriptURL + "?settings=1");
+  const res = await fetch(scriptURL2 + "?settings=1");
   const data = await res.json();
 
   const box = document.getElementById("statusBox");
@@ -216,7 +226,7 @@ document.getElementById("myForm").onsubmit = async function(e) {
     return;
   }
 
-  fetch(scriptURL, {
+  fetch(scriptURL2, {
     method: "POST",
     body: new FormData(this)
   })
@@ -225,11 +235,29 @@ document.getElementById("myForm").onsubmit = async function(e) {
     alert(msg);
     this.reset();
   });
-};
+    };
+  async function checkStatus() {
+  try {
+    const res = await fetch(scriptURL + "?settings=1");
+    const data = await res.json();
 
-// run on load
-checkStatus();
+    const box = document.getElementById("statusBox");
 
+    if (data.status === "Active") {
+      box.innerHTML = "🟢 APPLICATION IS OPEN";
+      box.style.color = "green";
+    } else {
+      box.innerHTML = "🔴 APPLICATION IS CLOSED";
+      box.style.color = "red";
+    }
+
+    return data.status;
+  } catch (error) {
+    document.getElementById("statusBox").innerHTML =
+      "⚠️ SYSTEM ERROR";
+  }
+}
+  setInterval(checkStatus, 5000);
     // FETCH DATA
     fetchBtn.addEventListener('click', function() {
       fetchBtn.textContent = "Loading...";
