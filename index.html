@@ -25,6 +25,32 @@
     table { width: 100%; border-collapse: collapse; min-width: 600px; }
     th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
     th { background-color: #052; color: white; }
+
+    .loader {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #fff;
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+                    }
+.blinking {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+      }
+                    
   </style>
 </head>
 <body>
@@ -199,6 +225,7 @@ async function checkStatus() {
 
 // ✅ FORM SUBMIT (USES ADMIN STATUS)
 form.onsubmit = async function(e) {
+form.onsubmit = async function(e) {
   e.preventDefault();
 
   const status = await checkStatus();
@@ -208,18 +235,30 @@ form.onsubmit = async function(e) {
     return;
   }
 
+  // 🔥 LOADING UI
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = 'Processing <span class="loader"></span>';
+
   fetch(scriptURL, {
     method: "POST",
     body: new FormData(form)
   })
   .then(res => res.text())
   .then(msg => {
+    submitBtn.classList.add("blinking");
+
+setTimeout(() => {
+  submitBtn.classList.remove("blinking");
+}, 5000);
     alert(msg);
     form.reset();
   })
-  .catch(() => alert("Submission failed"));
+  .catch(() => alert("Submission failed"))
+  .finally(() => {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = "Submit";
+  });
 };
-
 
 // ✅ LIVE STATUS UPDATE
 setInterval(checkStatus, 5000);
@@ -324,6 +363,25 @@ fetchBtn.addEventListener("click", function () {
         });
       }
     }
+  function loadLgas() {
+  const state = document.getElementById("State").value;
+  const lgaSelect = document.getElementById("LGA");
+
+  lgaSelect.innerHTML = '<option value="">Loading...</option>';
+
+  if (!state || !lgas[state]) {
+    lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+    return;
+  }
+
+  let options = '<option value="">Select LGA</option>';
+
+  lgas[state].forEach(lga => {
+    options += `<option value="${lga}">${lga}</option>`;
+  });
+
+  lgaSelect.innerHTML = options;
+  }
   </script>
 </body>
 </html>
