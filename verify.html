@@ -286,21 +286,19 @@ async function downloadPDF() {
   const { jsPDF } = window.jspdf;
 
   let data = filteredData;
-
   if (data.length === 0) {
     alert("No data available to download.");
     return;
   }
 
-  // ❌ REMOVE FIRST & LAST COLUMNS
+  // Remove first & last column
   let allHeaders = Object.keys(data[0]).filter(h => h !== "rowNumber");
-  let headers = allHeaders.slice(1, -1); // remove first & last column
+  let headers = allHeaders.slice(1, -1);
 
-  const pdf = new jsPDF('l', 'mm', 'a4'); // landscape for better fitting
+  const pdf = new jsPDF('l', 'mm', 'a4');
 
   const pageWidth = 297;
   const pageHeight = 210;
-
   const margin = 10;
   const usableWidth = pageWidth - margin * 2;
 
@@ -320,25 +318,19 @@ async function downloadPDF() {
 
   pdf.setFontSize(9);
 
-  // ✅ AUTO COLUMN WIDTH BASED ON TEXT LENGTH
+  // ✅ SMART COLUMN WIDTHS
   let colWidths = [];
-
-  // SN column width
-  colWidths.push(10);
+  colWidths.push(10); // SN
 
   headers.forEach(h => {
-    let maxLength = h.length;
-
-    data.forEach(row => {
-      let val = String(row[h] || "");
-      if (val.length > maxLength) maxLength = val.length;
-    });
-
-    // convert length → width
-    colWidths.push(Math.min(60, Math.max(20, maxLength * 2)));
+    if (h.toLowerCase().includes("name")) colWidths.push(50);
+    else if (h === "NIN") colWidths.push(45);
+    else if (h === "Phone Number") colWidths.push(40);
+    else if (h === "Account Number") colWidths.push(40);
+    else colWidths.push(30);
   });
 
-  // normalize to fit page
+  // Normalize
   let totalWidth = colWidths.reduce((a, b) => a + b, 0);
   let scale = usableWidth / totalWidth;
   colWidths = colWidths.map(w => w * scale);
@@ -349,13 +341,23 @@ async function downloadPDF() {
     let x = margin;
     pdf.setFont(undefined, "bold");
 
+    // SN
     pdf.rect(x, y, colWidths[0], rowHeight);
-    pdf.text("SN", x + 2, y + 5);
+    pdf.text("SN", x + colWidths[0]/2, y + 5, { align: "center" });
     x += colWidths[0];
 
     headers.forEach((h, i) => {
+      let headerText = h;
+
+      // ✅ Rename headers
+      if (h === "Phone Number") headerText = "Phone No.";
+      if (h === "Account Number") headerText = "ACC No";
+
       pdf.rect(x, y, colWidths[i + 1], rowHeight);
-      pdf.text(h.substring(0, 20), x + 2, y + 5);
+
+      // ✅ CENTER HEADER TEXT
+      pdf.text(headerText, x + colWidths[i + 1]/2, y + 5, { align: "center" });
+
       x += colWidths[i + 1];
     });
 
@@ -367,7 +369,7 @@ async function downloadPDF() {
 
   data.forEach((row, index) => {
 
-    // PAGE BREAK CHECK
+    // Page break
     if (y + rowHeight > pageHeight - margin) {
       pdf.addPage();
       y = margin;
@@ -381,21 +383,24 @@ async function downloadPDF() {
     pdf.text(String(index + 1), x + 2, y + 5);
     x += colWidths[0];
 
-    // DATA
     headers.forEach((h, i) => {
       pdf.rect(x, y, colWidths[i + 1], rowHeight);
 
       let value = row[h];
 
-// ✅ Format ONLY Date of Birth column
-if (h.toLowerCase().includes("date")) {
-  value = formatDate(value);
-}
+      // Format date
+      if (h.toLowerCase().includes("date")) {
+        value = formatDate(value);
+      }
 
-let text = String(value || "");
+      let text = String(value || "");
 
-      // truncate nicely
-      if (text.length > 25) text = text.substring(0, 25) + "...";
+      // ✅ Better fitting (less cutting)
+      let maxChars = Math.floor(colWidths[i + 1] / 2.2);
+
+      if (text.length > maxChars) {
+        text = text.substring(0, maxChars) + "...";
+      }
 
       pdf.text(text, x + 2, y + 5);
       x += colWidths[i + 1];
