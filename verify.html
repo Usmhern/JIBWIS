@@ -267,7 +267,7 @@ editForm.onsubmit = function(e) {
     })
     .finally(() => saveBtn.innerText = "Save");
 };
-  async function downloadPDF() {
+async function downloadPDF() {
   const { jsPDF } = window.jspdf;
 
   let data = filteredData;
@@ -277,16 +277,17 @@ editForm.onsubmit = function(e) {
     return;
   }
 
-  const headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
+  // ❌ REMOVE FIRST & LAST COLUMNS
+  let allHeaders = Object.keys(data[0]).filter(h => h !== "rowNumber");
+  let headers = allHeaders.slice(1, -1); // remove first & last column
 
-  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pdf = new jsPDF('l', 'mm', 'a4'); // landscape for better fitting
 
-  const pageWidth = 210;
-  const pageHeight = 297;
+  const pageWidth = 297;
+  const pageHeight = 210;
 
   const margin = 10;
   const usableWidth = pageWidth - margin * 2;
-  const usableHeight = pageHeight - margin * 2;
 
   let y = margin;
 
@@ -302,25 +303,45 @@ editForm.onsubmit = function(e) {
     y += 6;
   }
 
-  // Table settings
-  const colWidth = usableWidth / (headers.length + 1);
-  const rowHeight = 6;
+  pdf.setFontSize(9);
 
-  // Draw header
+  // ✅ AUTO COLUMN WIDTH BASED ON TEXT LENGTH
+  let colWidths = [];
+
+  // SN column width
+  colWidths.push(10);
+
+  headers.forEach(h => {
+    let maxLength = h.length;
+
+    data.forEach(row => {
+      let val = String(row[h] || "");
+      if (val.length > maxLength) maxLength = val.length;
+    });
+
+    // convert length → width
+    colWidths.push(Math.min(60, Math.max(20, maxLength * 2)));
+  });
+
+  // normalize to fit page
+  let totalWidth = colWidths.reduce((a, b) => a + b, 0);
+  let scale = usableWidth / totalWidth;
+  colWidths = colWidths.map(w => w * scale);
+
+  const rowHeight = 7;
+
   function drawHeader() {
-    pdf.setFontSize(9);
     let x = margin;
     pdf.setFont(undefined, "bold");
 
-    pdf.rect(x, y, colWidth, rowHeight);
-    pdf.text("SN", x + 1, y + 4);
+    pdf.rect(x, y, colWidths[0], rowHeight);
+    pdf.text("SN", x + 2, y + 5);
+    x += colWidths[0];
 
-    x += colWidth;
-
-    headers.forEach(h => {
-      pdf.rect(x, y, colWidth, rowHeight);
-      pdf.text(String(h).substring(0, 12), x + 1, y + 4);
-      x += colWidth;
+    headers.forEach((h, i) => {
+      pdf.rect(x, y, colWidths[i + 1], rowHeight);
+      pdf.text(h.substring(0, 20), x + 2, y + 5);
+      x += colWidths[i + 1];
     });
 
     pdf.setFont(undefined, "normal");
@@ -329,10 +350,9 @@ editForm.onsubmit = function(e) {
 
   drawHeader();
 
-  // Draw rows safely
-  data.forEach((row, i) => {
+  data.forEach((row, index) => {
 
-    // 🔥 CHECK PAGE BREAK BEFORE DRAWING ROW
+    // PAGE BREAK CHECK
     if (y + rowHeight > pageHeight - margin) {
       pdf.addPage();
       y = margin;
@@ -341,17 +361,22 @@ editForm.onsubmit = function(e) {
 
     let x = margin;
 
-    pdf.rect(x, y, colWidth, rowHeight);
-    pdf.text(String(i + 1), x + 1, y + 4);
-    x += colWidth;
+    // SN
+    pdf.rect(x, y, colWidths[0], rowHeight);
+    pdf.text(String(index + 1), x + 2, y + 5);
+    x += colWidths[0];
 
-    headers.forEach(h => {
-      pdf.rect(x, y, colWidth, rowHeight);
+    // DATA
+    headers.forEach((h, i) => {
+      pdf.rect(x, y, colWidths[i + 1], rowHeight);
 
-      let text = String(row[h] || "").substring(0, 15);
-      pdf.text(text, x + 1, y + 4);
+      let text = String(row[h] || "");
 
-      x += colWidth;
+      // truncate nicely
+      if (text.length > 25) text = text.substring(0, 25) + "...";
+
+      pdf.text(text, x + 2, y + 5);
+      x += colWidths[i + 1];
     });
 
     y += rowHeight;
