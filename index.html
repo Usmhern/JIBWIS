@@ -245,11 +245,7 @@ form.onsubmit = async function(e) {
   })
   .then(res => res.text())
   .then(msg => {
-    submitBtn.classList.add("blinking");
-
-setTimeout(() => {
-  submitBtn.classList.remove("blinking");
-}, 5000);
+    
     alert(msg);
     form.reset();
   })
