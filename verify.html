@@ -7,7 +7,6 @@
 
 <style>
 * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-
 body { margin: 0; background: #f4f6f9; }
 
 /* TOP BAR */
@@ -19,11 +18,7 @@ body { margin: 0; background: #f4f6f9; }
   padding: 12px;
 }
 
-.menu-btn {
-  font-size: 22px;
-  cursor: pointer;
-  margin-right: 10px;
-}
+.menu-btn { font-size: 22px; cursor: pointer; margin-right: 10px; }
 
 /* SIDEBAR */
 .sidebar {
@@ -36,12 +31,9 @@ body { margin: 0; background: #f4f6f9; }
   color: white;
   padding-top: 20px;
   transition: 0.3s;
-  z-index: 1000;
 }
 
 .sidebar.active { left: 0; }
-
-.sidebar h3 { text-align: center; }
 
 .sidebar a {
   display: block;
@@ -72,15 +64,14 @@ body { margin: 0; background: #f4f6f9; }
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 15px;
 }
 
 .search-box { position: relative; }
 
 .search-box input {
   padding: 8px 10px 8px 35px;
-  border-radius: 5px;
   border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 .search-box span {
@@ -108,85 +99,60 @@ th, td {
 th {
   background: #052;
   color: white;
-  position: sticky;
-  top: 0;
 }
 
-/* BUTTONS */
-button {
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.btn-download { background: #052; color: white; padding: 8px 15px; }
-
-/* PAGINATION */
-.pagination {
-  text-align: center;
-  margin-top: 15px;
-}
-
-.pagination button {
-  margin: 3px;
-  padding: 6px 10px;
+/* BUTTON */
+.btn-download {
   background: #052;
   color: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
 }
-
-.active { background: #0a7 !important; }
-
 </style>
 </head>
 
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
   <span class="menu-btn" onclick="toggleSidebar()">⋮</span>
-  <h3 style="margin:0;">AfriFUND Dashboard</h3>
+  <h3>AfriFUND Dashboard</h3>
 </div>
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-  <h3>AfriFUND</h3>
-  <a href="#">📄 Applications</a>
-  <a href="#">🛠 Admin</a>
-  <a href="#">⚙ Settings</a>
+  <a href="index.html">📄 Applications</a>
+  <a href="verify.html">🛠 Admin</a>
+  <a href="admin.html">⚙ Settings</a>
 </div>
 
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="controls">
-
   <button class="btn-download" onclick="downloadPDF()">⬇ Download PDF</button>
 
   <div class="search-box">
     <span>🔍</span>
-    <input type="text" id="searchInput" placeholder="Search records...">
+    <input type="text" id="searchInput" placeholder="Search...">
   </div>
 
-  <div>
-    <span id="totalCount"></span>
-
-    <select id="rowsPerPage">
-      <option value="0-10">0-10</option>
-      <option value="10-25">10-25</option>
-      <option value="25-50">25-50</option>
-      <option value="50-100">50-100</option>
-      <option value="all">All</option>
-    </select>
-  </div>
-
+  <select id="rowsPerPage">
+    <option value="0-10">0-10</option>
+    <option value="10-25">10-25</option>
+    <option value="25-50">25-50</option>
+    <option value="50-100">50-100</option>
+    <option value="all">All</option>
+  </select>
 </div>
 
 <div class="table-box" id="tableContainer"></div>
-<div class="pagination" id="pagination"></div>
 
 </div>
+
+<!-- LIBRARIES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbw7wt1Rok24XHEoRUJ1ruw9qnEBCtd_LldUFX-Zo-0toAFNoJWL27MgVTiFdg1MOk3t/exec";
@@ -194,51 +160,36 @@ const scriptURL = "https://script.google.com/macros/s/AKfycbw7wt1Rok24XHEoRUJ1ru
 let allData = [];
 let filteredData = [];
 let rangeMode = "0-10";
-let isTyping = false;
 
 /* SIDEBAR */
 function toggleSidebar() {
   sidebar.classList.toggle("active");
   overlay.classList.toggle("active");
 }
-
 function closeSidebar() {
   sidebar.classList.remove("active");
   overlay.classList.remove("active");
 }
 
 /* FETCH */
-function fetchRecords(silent = false) {
+function fetchRecords() {
   fetch(scriptURL)
     .then(res => res.json())
     .then(data => {
-
-      if (JSON.stringify(data) !== JSON.stringify(allData)) {
-        allData = data;
-
-        let search = searchInput.value.toLowerCase();
-        filteredData = allData.filter(row =>
-          Object.values(row).join(" ").toLowerCase().includes(search)
-        );
-
-        renderTable();
-      }
+      allData = data;
+      filteredData = data;
+      renderTable();
     });
 }
 
 /* SEARCH */
-searchInput.addEventListener("input", function () {
-  let val = this.value.toLowerCase();
-
-  filteredData = allData.filter(row =>
-    Object.values(row).join(" ").toLowerCase().includes(val)
+searchInput.oninput = function () {
+  let v = this.value.toLowerCase();
+  filteredData = allData.filter(r =>
+    Object.values(r).join(" ").toLowerCase().includes(v)
   );
-
   renderTable();
-});
-
-searchInput.addEventListener("focus", () => isTyping = true);
-searchInput.addEventListener("blur", () => isTyping = false);
+};
 
 /* RANGE */
 rowsPerPage.onchange = function () {
@@ -248,22 +199,17 @@ rowsPerPage.onchange = function () {
 
 /* TABLE */
 function renderTable() {
-  totalCount.innerText = "Total: " + filteredData.length;
-
   let start = 0, end = filteredData.length;
 
   if (rangeMode !== "all") {
     let p = rangeMode.split("-");
-    start = parseInt(p[0]);
-    end = parseInt(p[1]);
+    start = +p[0];
+    end = +p[1];
   }
 
   let data = filteredData.slice(start, end);
 
-  if (!data.length) {
-    tableContainer.innerHTML = "No records";
-    return;
-  }
+  if (!data.length) return tableContainer.innerHTML = "No records";
 
   let headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
 
@@ -271,9 +217,9 @@ function renderTable() {
   headers.forEach(h => html += `<th>${h}</th>`);
   html += "</tr>";
 
-  data.forEach((row, i) => {
-    html += `<tr><td>${start + i + 1}</td>`;
-    headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
+  data.forEach((row,i) => {
+    html += `<tr><td>${start+i+1}</td>`;
+    headers.forEach(h => html += `<td>${row[h]||""}</td>`);
     html += "</tr>";
   });
 
@@ -281,15 +227,61 @@ function renderTable() {
   tableContainer.innerHTML = html;
 }
 
-/* AUTO REFRESH (SILENT) */
-setInterval(() => {
-  if (!isTyping) fetchRecords(true);
-}, 5000);
+/* ✅ PDF DOWNLOAD (FULLY WORKING) */
+async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
 
-/* PDF */
-function downloadPDF() {
-  alert("PDF already integrated in your full system");
+  if (!filteredData.length) {
+    alert("No data to download");
+    return;
+  }
+
+  let pdf = new jsPDF('l','mm','a4');
+  let y = 10;
+
+  pdf.setFontSize(14);
+  pdf.text("AfriFUND Records", 148, y, {align:"center"});
+  y += 10;
+
+  let headers = Object.keys(filteredData[0]).filter(h => h !== "rowNumber");
+
+  pdf.setFontSize(8);
+
+  // Header
+  let x = 10;
+  pdf.text("SN", x, y); x += 10;
+
+  headers.forEach(h => {
+    pdf.text(h.substring(0,10), x, y);
+    x += 30;
+  });
+
+  y += 6;
+
+  // Rows
+  filteredData.forEach((row,i) => {
+    if (y > 190) {
+      pdf.addPage();
+      y = 10;
+    }
+
+    let x = 10;
+    pdf.text(String(i+1), x, y); x += 10;
+
+    headers.forEach(h => {
+      let val = String(row[h]||"").substring(0,15);
+      pdf.text(val, x, y);
+      x += 30;
+    });
+
+    y += 6;
+  });
+
+  pdf.save("AfriFUND.pdf");
 }
+
+/* AUTO REFRESH */
+setInterval(fetchRecords, 5000);
 
 /* INIT */
 fetchRecords();
