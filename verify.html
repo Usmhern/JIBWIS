@@ -319,34 +319,42 @@ async function downloadPDF() {
   pdf.setFontSize(9);
 
   // ✅ SMART COLUMN WIDTHS
-  let colWidths = [];
+ let colWidths = [];
 colWidths.push(10); // SN
 
 headers.forEach(h => {
 
-  // ✅ FORCE NAME COLUMN TO BE WIDER
+  // ✅ NAME (2nd column)
   if (h.toLowerCase().includes("name")) {
-    colWidths.push(70); // 🔥 BIG SPACE FOR NAMES
+    colWidths.push(60);
   }
+
+  // ✅ EMAIL (VERY IMPORTANT - GIVE FULL SPACE)
+  else if (h.toLowerCase().includes("email")) {
+    colWidths.push(85); // 🔥 BIG SPACE FOR EMAIL
+  }
+
   else if (h === "NIN") {
-    colWidths.push(40);
+    colWidths.push(35);
   }
+
   else if (h === "Phone Number") {
-    colWidths.push(35);
+    colWidths.push(30);
   }
+
   else if (h === "Account Number") {
-    colWidths.push(35);
+    colWidths.push(30);
   }
+
+  // ✅ columns 6,7,8 (shift smaller)
   else {
-    colWidths.push(25);
+    colWidths.push(20);
   }
-
 });
-
   // Normalize
   let totalWidth = colWidths.reduce((a, b) => a + b, 0);
-  let scale = usableWidth / totalWidth;
-  colWidths = colWidths.map(w => w * scale);
+let scale = usableWidth / totalWidth;
+colWidths = colWidths.map(w => w * scale);
 
   const rowHeight = 7;
 
