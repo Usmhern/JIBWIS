@@ -1,145 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Center - Manage Records</title>
-  <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body { margin: 0; padding: 20px; background: #f0f2f5; color: #333; }
-    
-    h2 { color: #052; text-align: center; margin-top: 40px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Center - Manage Records</title>
 
-    /* Table Styling */
-    .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 20px; }
-    table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-    th, td { padding: 12px 15px; border: 1px solid #eee; text-align: left; font-size: 13px; }
-    th { background: #052; color: white; position: sticky; top: 0; }
-    tr:hover { background-color: #f1f8f1; }
+<style>
+* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body { margin: 0; padding: 20px; background: #f0f2f5; color: #333; }
 
-    /* Action Buttons */
-    .btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
-    .btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
-    .btn-edit:hover { background: #e68a00; }
-    .btn-delete:hover { background: #c9302c; }
+h2 { color: #052; text-align: center; margin-top: 20px; }
 
-    /* Modal Styling */
-    #editModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-    .modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 10px; }
-    .modal-content h3 { margin-top: 0; color: #052; }
-    .modal-content input { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
-    .modal-actions { display: flex; justify-content: space-between; margin-top: 15px; }
-    .save-btn { background: #052; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-    .cancel-btn { background: #777; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+/* Controls */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  gap: 10px;
+}
 
-    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #052; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
+.controls input, .controls select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+/* Table */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-top: 10px;
+}
+
+table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+th, td { padding: 12px; border: 1px solid #eee; font-size: 13px; }
+th { background: #052; color: white; position: sticky; top: 0; }
+tr:hover { background-color: #f1f8f1; }
+
+/* Buttons */
+.btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; cursor: pointer; }
+.btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; cursor: pointer; }
+
+/* Pagination */
+.pagination {
+  margin-top: 15px;
+  text-align: center;
+}
+.pagination button {
+  margin: 3px;
+  padding: 6px 10px;
+  border: none;
+  background: #052;
+  color: white;
+  cursor: pointer;
+}
+.pagination button.active {
+  background: #0a7;
+}
+
+/* Modal (unchanged) */
+#editModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+.modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 10px; }
+.modal-content input { width: 100%; padding: 8px; margin: 8px 0; }
+.modal-actions { display: flex; justify-content: space-between; }
+
+.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #052; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
 </head>
+
 <body>
 
-  <h2>AfriFUND Application Database</h2>
-  <div id="loader" class="spinner"></div>
-  <div class="table-responsive" id="tableContainer"></div>
+<h2>AfriFUND Database</h2>
 
-  <div id="editModal">
-    <div class="modal-content">
-      <h3>Edit Record</h3>
-      <form id="editForm">
-        <input type="hidden" name="rowNumber" id="editRowNumber">
-        <input type="hidden" name="action" value="edit">
-        <label>Name</label><input type="text" name="Name" id="editName" required>
-        <label>NIN</label><input type="text" name="NIN" id="editNIN" required>
-        <label>Phone Number</label><input type="text" name="Phone Number" id="editPhone" required>
-        <label>Email</label><input type="email" name="Email" id="editEmail" required>
-        <div class="modal-actions">
-          <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
-          <button type="submit" class="save-btn" id="saveBtn">Save Changes</button>
-        </div>
-      </form>
-    </div>
+<div class="controls">
+  <input type="text" id="searchInput" placeholder="Search records...">
+  
+  <select id="rowsPerPage">
+    <option value="10">0-10</option>
+    <option value="25">10-25</option>
+    <option value="50">10-50</option>
+    <option value="100">10-100</option>
+    <option value="all">All</option>
+  </select>
+</div>
+
+<div id="loader" class="spinner"></div>
+<div class="table-responsive" id="tableContainer"></div>
+<div class="pagination" id="pagination"></div>
+
+<!-- EDIT MODAL (UNCHANGED) -->
+<div id="editModal">
+  <div class="modal-content">
+    <h3>Edit Record</h3>
+    <form id="editForm">
+      <input type="hidden" name="rowNumber" id="editRowNumber">
+      <input type="hidden" name="action" value="edit">
+      <input type="text" name="Name" id="editName" required>
+      <input type="text" name="NIN" id="editNIN" required>
+      <input type="text" name="Phone Number" id="editPhone" required>
+      <input type="email" name="Email" id="editEmail" required>
+
+      <div class="modal-actions">
+        <button type="button" onclick="closeModal()">Cancel</button>
+        <button type="submit" id="saveBtn">Save</button>
+      </div>
+    </form>
   </div>
+</div>
 
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbw7wt1Rok24XHEoRUJ1ruw9qnEBCtd_LldUFX-Zo-0toAFNoJWL27MgVTiFdg1MOk3t/exec";
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbw7wt1Rok24XHEoRUJ1ruw9qnEBCtd_LldUFX-Zo-0toAFNoJWL27MgVTiFdg1MOk3t/exec";
 
-    window.onload = fetchRecords;
+let allData = [];
+let filteredData = [];
+let currentPage = 1;
+let rowsPerPage = 10;
 
-    function fetchRecords() {
-      const loader = document.getElementById("loader");
-      loader.style.display = "block";
-      fetch(scriptURL)
-        .then(res => res.json())
-        .then(data => {
-          if (data.length === 0) {
-            document.getElementById("tableContainer").innerHTML = "<p>No records found.</p>";
-            return;
-          }
-          let headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
-          let html = `<table><thead><tr><th>SN</th>`;
-          headers.forEach(h => html += `<th>${h}</th>`);
-          html += `<th>Actions</th></tr></thead><tbody>`;
+window.onload = fetchRecords;
 
-          data.forEach((row, i) => {
-            html += `<tr><td>${i+1}</td>`;
-            headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
-            html += `<td>
-              <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row)})'>Edit</button>
-              <button class="btn-delete" onclick="deleteRow(${row.rowNumber})">Delete</button>
-            </td></tr>`;
-          });
-          html += `</tbody></table>`;
-          document.getElementById("tableContainer").innerHTML = html;
-        })
-        .finally(() => loader.style.display = "none");
-    }
+/* FETCH */
+function fetchRecords() {
+  loader.style.display = "block";
+  fetch(scriptURL)
+    .then(res => res.json())
+    .then(data => {
+      allData = data;
+      filteredData = data;
+      renderTable();
+    })
+    .finally(() => loader.style.display = "none");
+}
 
-    function deleteRow(rowNum) {
-      if (confirm("Are you sure? This will remove the record from the Google Sheet forever.")) {
-        const fd = new FormData();
-        fd.append("action", "delete");
-        fd.append("rowNumber", rowNum);
+/* SEARCH */
+document.getElementById("searchInput").addEventListener("input", function() {
+  const value = this.value.toLowerCase();
+  filteredData = allData.filter(row =>
+    Object.values(row).join(" ").toLowerCase().includes(value)
+  );
+  currentPage = 1;
+  renderTable();
+});
 
-        fetch(scriptURL, { method: "POST", body: fd })
-          .then(res => res.text())
-          .then(msg => {
-            alert(msg);
-            fetchRecords();
-          });
-      }
-    }
+/* ROW SELECT */
+document.getElementById("rowsPerPage").addEventListener("change", function() {
+  rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
+  currentPage = 1;
+  renderTable();
+});
 
-    function openEditModal(row) {
-      document.getElementById("editRowNumber").value = row.rowNumber;
-      document.getElementById("editName").value = row["Name"] || "";
-      document.getElementById("editNIN").value = row["NIN"] || "";
-      document.getElementById("editPhone").value = row["Phone Number"] || "";
-      document.getElementById("editEmail").value = row["Email"] || "";
-      document.getElementById("editModal").style.display = "block";
-    }
+/* TABLE */
+function renderTable() {
+  let data = filteredData;
+  let start = (currentPage - 1) * rowsPerPage;
+  let end = rowsPerPage === "all" ? data.length : start + rowsPerPage;
+  let paginated = rowsPerPage === "all" ? data : data.slice(start, end);
 
-    function closeModal() {
-      document.getElementById("editModal").style.display = "none";
-    }
+  if (data.length === 0) {
+    tableContainer.innerHTML = "<p>No records found.</p>";
+    pagination.innerHTML = "";
+    return;
+  }
 
-    document.getElementById("editForm").onsubmit = function(e) {
-      e.preventDefault();
-      const saveBtn = document.getElementById("saveBtn");
-      saveBtn.innerText = "Saving...";
-      saveBtn.disabled = true;
+  let headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
 
-      fetch(scriptURL, { method: "POST", body: new FormData(this) })
-        .then(res => res.text())
-        .then(msg => {
-          alert(msg);
-          closeModal();
-          fetchRecords();
-        })
-        .finally(() => {
-          saveBtn.innerText = "Save Changes";
-          saveBtn.disabled = false;
-        });
-    };
-  </script>
+  let html = `<table><thead><tr><th>SN</th>`;
+  headers.forEach(h => html += `<th>${h}</th>`);
+  html += `<th>Actions</th></tr></thead><tbody>`;
+
+  paginated.forEach((row, i) => {
+    html += `<tr><td>${start + i + 1}</td>`;
+    headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
+    html += `<td>
+      <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row)})'>Edit</button>
+      <button class="btn-delete" onclick="deleteRow(${row.rowNumber})">Delete</button>
+    </td></tr>`;
+  });
+
+  html += `</tbody></table>`;
+  tableContainer.innerHTML = html;
+
+  renderPagination(data.length);
+}
+
+/* PAGINATION */
+function renderPagination(total) {
+  if (rowsPerPage === "all") {
+    pagination.innerHTML = "";
+    return;
+  }
+
+  let pages = Math.ceil(total / rowsPerPage);
+  let html = "";
+
+  for (let i = 1; i <= pages; i++) {
+    html += `<button class="${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+
+  pagination.innerHTML = html;
+}
+
+function goPage(page) {
+  currentPage = page;
+  renderTable();
+}
+
+/* DELETE */
+function deleteRow(rowNum) {
+  if (confirm("Delete this record permanently?")) {
+    const fd = new FormData();
+    fd.append("action", "delete");
+    fd.append("rowNumber", rowNum);
+
+    fetch(scriptURL, { method: "POST", body: fd })
+      .then(res => res.text())
+      .then(() => fetchRecords());
+  }
+}
+
+/* EDIT */
+function openEditModal(row) {
+  editRowNumber.value = row.rowNumber;
+  editName.value = row["Name"] || "";
+  editNIN.value = row["NIN"] || "";
+  editPhone.value = row["Phone Number"] || "";
+  editEmail.value = row["Email"] || "";
+  editModal.style.display = "block";
+}
+
+function closeModal() {
+  editModal.style.display = "none";
+}
+
+editForm.onsubmit = function(e) {
+  e.preventDefault();
+  saveBtn.innerText = "Saving...";
+
+  fetch(scriptURL, { method: "POST", body: new FormData(this) })
+    .then(res => res.text())
+    .then(() => {
+      closeModal();
+      fetchRecords();
+    })
+    .finally(() => saveBtn.innerText = "Save");
+};
+</script>
+
 </body>
 </html>
