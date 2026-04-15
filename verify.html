@@ -228,57 +228,52 @@ function renderTable() {
 }
 
 /* ✅ PDF DOWNLOAD (FULLY WORKING) */
-async function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-
-  if (!filteredData.length) {
-    alert("No data to download");
-    return;
-  }
-
-  let pdf = new jsPDF('l','mm','a4');
-  let y = 10;
-
-  pdf.setFontSize(14);
-  pdf.text("AfriFUND Records", 148, y, {align:"center"});
-  y += 10;
-
-  let headers = Object.keys(filteredData[0]).filter(h => h !== "rowNumber");
-
-  pdf.setFontSize(8);
-
-  // Header
-  let x = 10;
-  pdf.text("SN", x, y); x += 10;
-
-  headers.forEach(h => {
-    pdf.text(h.substring(0,10), x, y);
-    x += 30;
-  });
-
-  y += 6;
-
-  // Rows
-  filteredData.forEach((row,i) => {
-    if (y > 190) {
-      pdf.addPage();
-      y = 10;
-    }
-
-    let x = 10;
-    pdf.text(String(i+1), x, y); x += 10;
-
-    headers.forEach(h => {
-      let val = String(row[h]||"").substring(0,15);
-      pdf.text(val, x, y);
-      x += 30;
-    });
-
-    y += 6;
-  });
-
-  pdf.save("AfriFUND.pdf");
-}
+async function downloadPDF() {  
+  const { jsPDF } = window.jspdf;  
+  
+  let data = filteredData;  
+  if (data.length === 0) {  
+    alert("No data available to download.");  
+    return;  
+  }  
+  
+  // Remove first & last column  
+    
+let allHeaders = Object.keys(data[0]).filter(h => {  
+  let key = h.toLowerCase();  
+  
+  return (  
+    h !== "rowNumber" &&  
+    key !== "timestamp" &&  
+    key !== "email" &&  
+    key !== "otp"  
+  );  
+});  
+// still remove first & last column if needed  
+let headers = allHeaders.slice(1, -1);  
+  
+  const pdf = new jsPDF('l', 'mm', 'a4');  
+  
+  const pageWidth = 297;  
+  const pageHeight = 210;  
+  const margin = 10;  
+  const usableWidth = pageWidth - margin * 2;  
+  
+  let y = margin;  
+  
+  // Title  
+  pdf.setFontSize(14);  
+  pdf.text("AfriFUND Application Records", pageWidth / 2, y, { align: "center" });  
+  y += 8;  
+  
+  const searchValue = document.getElementById("searchInput").value;  
+  if (searchValue) {  
+    pdf.setFontSize(10);  
+    pdf.text("Filter: " + searchValue, margin, y);  
+    y += 6;  
+  }  
+  
+  pdf.setFontSize(9);  
 
 /* AUTO REFRESH */
 setInterval(fetchRecords, 5000);
