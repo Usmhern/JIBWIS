@@ -79,15 +79,22 @@ tr:hover { background-color: #f1f8f1; }
 
 <div class="controls">
   <input type="text" id="searchInput" placeholder="Search records...">
-  
-  <select id="rowsPerPage">
-    <option value="10">0-10</option>
-    <option value="25">10-25</option>
-    <option value="50">10-50</option>
-    <option value="100">10-100</option>
-    <option value="all">All</option>
-  </select>
+
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span id="totalCount" style="font-weight:bold; color:#052;">
+      Total: 0
+    </span>
+
+    <select id="rowsPerPage">
+      <option value="10">0-10</option>
+      <option value="25">10-25</option>
+      <option value="50">10-50</option>
+      <option value="100">10-100</option>
+      <option value="all">All</option>
+    </select>
+  </div>
 </div>
+  
 
 <div id="loader" class="spinner"></div>
 <div class="table-responsive" id="tableContainer"></div>
@@ -155,6 +162,8 @@ document.getElementById("rowsPerPage").addEventListener("change", function() {
 
 /* TABLE */
 function renderTable() {
+  document.getElementById("totalCount").innerText = "Total: " + filteredData.length;
+ 
   let data = filteredData;
   let start = (currentPage - 1) * rowsPerPage;
   let end = rowsPerPage === "all" ? data.length : start + rowsPerPage;
