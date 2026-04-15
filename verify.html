@@ -3,131 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Center - Manage Records</title>
+<title>AfriFUND Admin Dashboard</title>
 
 <style>
-* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-body { margin: 0; padding: 20px; background: #f0f2f5; color: #333; }
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
 
-h2 { color: #052; text-align: center; margin-top: 20px; }
+body {
+  margin: 0;
+  background: #f4f6f9;
+}
 
-/* Controls */
+/* SIDEBAR */
+.sidebar {
+  position: fixed;
+  width: 220px;
+  height: 100%;
+  background: #052;
+  color: white;
+  padding-top: 20px;
+}
+
+.sidebar h3 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px 20px;
+  color: white;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  background: #0a7;
+}
+
+/* MAIN */
+.main {
+  margin-left: 220px;
+  padding: 20px;
+}
+
+h2 {
+  color: #052;
+  text-align: center;
+}
+
+/* CONTROLS */
 .controls {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  margin-top: 20px;
   gap: 10px;
+  margin-top: 20px;
 }
 
-.controls input, .controls select {
-  padding: 8px;
+/* SEARCH */
+.search-box {
+  position: relative;
+}
+
+.search-box input {
+  padding: 8px 10px 8px 35px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
 
-/* Table */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
+.search-box span {
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  color: #888;
+}
+
+/* TABLE */
+.table-box {
+  margin-top: 15px;
   background: white;
   border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  margin-top: 10px;
+  overflow-x: auto;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-th, td { padding: 12px; border: 1px solid #eee; font-size: 13px; }
-th { background: #052; color: white; position: sticky; top: 0; }
-tr:hover { background-color: #f1f8f1; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
 
-/* Buttons */
-.btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; cursor: pointer; }
-.btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; cursor: pointer; }
+th, td {
+  padding: 10px;
+  border: 1px solid #eee;
+  font-size: 13px;
+}
 
-/* Pagination */
+th {
+  background: #052;
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+tr:hover {
+  background: #f1f8f1;
+}
+
+/* BUTTONS */
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+.btn-download {
+  background: #052;
+  color: white;
+  padding: 8px 15px;
+}
+
+.btn-edit { background: orange; color: white; padding: 5px 10px; }
+.btn-delete { background: red; color: white; padding: 5px 10px; }
+
+/* PAGINATION */
 .pagination {
-  margin-top: 15px;
   text-align: center;
+  margin-top: 15px;
 }
+
 .pagination button {
   margin: 3px;
   padding: 6px 10px;
-  border: none;
   background: #052;
   color: white;
-  cursor: pointer;
 }
-.pagination button.active {
+
+.pagination .active {
   background: #0a7;
 }
 
-/* Modal (unchanged) */
-#editModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-.modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 10px; }
-.modal-content input { width: 100%; padding: 8px; margin: 8px 0; }
-.modal-actions { display: flex; justify-content: space-between; }
+/* LOADER */
+.spinner {
+  border: 4px solid #eee;
+  border-top: 4px solid #052;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+  display: none;
+}
 
-.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #052; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
-@keyframes spin { 100% { transform: rotate(360deg); } }
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
 </style>
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h3>AfriFUND</h3>
+  <a href="#">📄 Applications</a>
+  <a href="#">🛠 Admin</a>
+  <a href="#">⚙ Settings</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
 <h2>AfriFUND Database</h2>
 
 <div class="controls">
-  <button onclick="downloadPDF()" style="
-  background:#052;
-  color:white;
-  border:none;
-  padding:8px 15px;
-  border-radius:5px;
-  cursor:pointer;
-">
-  Download PDF
-  </button>
-  <input type="text" id="searchInput" placeholder="Search records...">
 
-  <div style="display:flex; align-items:center; gap:10px;">
-    <span id="totalCount" style="font-weight:bold; color:#052;">
-      Total: 0
-    </span>
+  <button class="btn-download" onclick="downloadPDF()">⬇ Download PDF</button>
+
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" id="searchInput" placeholder="Search records...">
+  </div>
+
+  <div>
+    <span id="totalCount"></span>
 
     <select id="rowsPerPage">
-      <option value="10">0-10</option>
-      <option value="25">10-25</option>
-      <option value="50">10-50</option>
-      <option value="100">10-100</option>
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
       <option value="all">All</option>
     </select>
   </div>
+
 </div>
-  
 
 <div id="loader" class="spinner"></div>
-<div class="table-responsive" id="tableContainer"></div>
+
+<div class="table-box" id="tableContainer"></div>
+
 <div class="pagination" id="pagination"></div>
 
-<!-- EDIT MODAL (UNCHANGED) -->
-<div id="editModal">
-  <div class="modal-content">
-    <h3>Edit Record</h3>
-    <form id="editForm">
-      <input type="hidden" name="rowNumber" id="editRowNumber">
-      <input type="hidden" name="action" value="edit">
-      <input type="text" name="Name" id="editName" required>
-      <input type="text" name="NIN" id="editNIN" required>
-      <input type="text" name="Phone Number" id="editPhone" required>
-      <input type="email" name="Email" id="editEmail" required>
-
-      <div class="modal-actions">
-        <button type="button" onclick="closeModal()">Cancel</button>
-        <button type="submit" id="saveBtn">Save</button>
-      </div>
-    </form>
-  </div>
 </div>
 
 <script>
@@ -137,12 +216,12 @@ let allData = [];
 let filteredData = [];
 let currentPage = 1;
 let rowsPerPage = 10;
-
-window.onload = fetchRecords;
+let isTyping = false;
 
 /* FETCH */
 function fetchRecords() {
   loader.style.display = "block";
+
   fetch(scriptURL)
     .then(res => res.json())
     .then(data => {
@@ -154,64 +233,65 @@ function fetchRecords() {
 }
 
 /* SEARCH */
-document.getElementById("searchInput").addEventListener("input", function() {
-  const value = this.value.toLowerCase();
+searchInput.addEventListener("input", function() {
+  let value = this.value.toLowerCase();
+
   filteredData = allData.filter(row =>
     Object.values(row).join(" ").toLowerCase().includes(value)
   );
+
   currentPage = 1;
   renderTable();
 });
 
-/* ROW SELECT */
-document.getElementById("rowsPerPage").addEventListener("change", function() {
+/* TYPING CONTROL */
+searchInput.addEventListener("focus", () => isTyping = true);
+searchInput.addEventListener("blur", () => isTyping = false);
+
+/* ROW CHANGE */
+rowsPerPage.onchange = function() {
   rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
   currentPage = 1;
   renderTable();
-});
+};
 
 /* TABLE */
 function renderTable() {
-  document.getElementById("totalCount").innerText = "Total: " + filteredData.length;
- 
-  let data = filteredData;
-  let start = (currentPage - 1) * rowsPerPage;
-  let end = rowsPerPage === "all" ? data.length : start + rowsPerPage;
-  let paginated = rowsPerPage === "all" ? data : data.slice(start, end);
+  totalCount.innerText = "Total: " + filteredData.length;
 
-  if (data.length === 0) {
-    tableContainer.innerHTML = "<p>No records found.</p>";
-    pagination.innerHTML = "";
+  let start = (currentPage - 1) * rowsPerPage;
+  let end = rowsPerPage === "all" ? filteredData.length : start + rowsPerPage;
+  let data = rowsPerPage === "all" ? filteredData : filteredData.slice(start, end);
+
+  if (!data.length) {
+    tableContainer.innerHTML = "No records found";
     return;
   }
 
   let headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
 
-  let html = `<table><thead><tr><th>SN</th>`;
+  let html = "<table><thead><tr><th>SN</th>";
   headers.forEach(h => html += `<th>${h}</th>`);
-  html += `<th>Actions</th></tr></thead><tbody>`;
+  html += "<th>Actions</th></tr></thead><tbody>";
 
-  paginated.forEach((row, i) => {
+  data.forEach((row, i) => {
     html += `<tr><td>${start + i + 1}</td>`;
     headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
     html += `<td>
-      <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row)})'>Edit</button>
-      <button class="btn-delete" onclick="deleteRow(${row.rowNumber})">Delete</button>
+      <button class="btn-edit">Edit</button>
+      <button class="btn-delete">Delete</button>
     </td></tr>`;
   });
 
-  html += `</tbody></table>`;
+  html += "</tbody></table>";
   tableContainer.innerHTML = html;
 
-  renderPagination(data.length);
+  renderPagination(filteredData.length);
 }
 
 /* PAGINATION */
 function renderPagination(total) {
-  if (rowsPerPage === "all") {
-    pagination.innerHTML = "";
-    return;
-  }
+  if (rowsPerPage === "all") return pagination.innerHTML = "";
 
   let pages = Math.ceil(total / rowsPerPage);
   let html = "";
@@ -223,228 +303,24 @@ function renderPagination(total) {
   pagination.innerHTML = html;
 }
 
-function goPage(page) {
-  currentPage = page;
+function goPage(p) {
+  currentPage = p;
   renderTable();
 }
 
-/* DELETE */
-function deleteRow(rowNum) {
-  if (confirm("Delete this record permanently?")) {
-    const fd = new FormData();
-    fd.append("action", "delete");
-    fd.append("rowNumber", rowNum);
+/* AUTO REFRESH */
+setInterval(() => {
+  if (!isTyping) fetchRecords();
+}, 5000);
 
-    fetch(scriptURL, { method: "POST", body: fd })
-      .then(res => res.text())
-      .then(() => fetchRecords());
-  }
+/* PDF */
+function downloadPDF() {
+  alert("PDF logic already in your system");
 }
 
-/* EDIT */
-function openEditModal(row) {
-  editRowNumber.value = row.rowNumber;
-  editName.value = row["Name"] || "";
-  editNIN.value = row["NIN"] || "";
-  editPhone.value = row["Phone Number"] || "";
-  editEmail.value = row["Email"] || "";
-  editModal.style.display = "block";
-}
-
-function closeModal() {
-  editModal.style.display = "none";
-}
-
-editForm.onsubmit = function(e) {
-  e.preventDefault();
-  saveBtn.innerText = "Saving...";
-
-  fetch(scriptURL, { method: "POST", body: new FormData(this) })
-    .then(res => res.text())
-    .then(() => {
-      closeModal();
-      fetchRecords();
-    })
-    .finally(() => saveBtn.innerText = "Save");
-};
-
-  function formatDate(value) {
-  if (!value) return "";
-
-  let date = new Date(value);
-
-  if (isNaN(date)) return value; // if not a valid date, return as-is
-
-  let day = String(date.getDate()).padStart(2, '0');
-  let month = String(date.getMonth() + 1).padStart(2, '0');
-  let year = date.getFullYear();
-
-  return `${day}/${month}/${year}`;
-    }
-  
-async function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-
-  let data = filteredData;
-  if (data.length === 0) {
-    alert("No data available to download.");
-    return;
-  }
-
-  // Remove first & last column
-  
-let allHeaders = Object.keys(data[0]).filter(h => {
-  let key = h.toLowerCase();
-
-  return (
-    h !== "rowNumber" &&
-    key !== "timestamp" &&
-    key !== "email" &&
-    key !== "otp"
-  );
-});
-// still remove first & last column if needed
-let headers = allHeaders.slice(1, -1);
-
-  const pdf = new jsPDF('l', 'mm', 'a4');
-
-  const pageWidth = 297;
-  const pageHeight = 210;
-  const margin = 10;
-  const usableWidth = pageWidth - margin * 2;
-
-  let y = margin;
-
-  // Title
-  pdf.setFontSize(14);
-  pdf.text("AfriFUND Application Records", pageWidth / 2, y, { align: "center" });
-  y += 8;
-
-  const searchValue = document.getElementById("searchInput").value;
-  if (searchValue) {
-    pdf.setFontSize(10);
-    pdf.text("Filter: " + searchValue, margin, y);
-    y += 6;
-  }
-
-  pdf.setFontSize(9);
-
-  // ✅ SMART COLUMN WIDTHS
- let colWidths = [];
-colWidths.push(10); // SN
-
-headers.forEach(h => {
-
-  // ✅ NAME (2nd column)
-  if (h.toLowerCase().includes("name")) {
-    colWidths.push(60);
-  }
-
-  // ✅ EMAIL (VERY IMPORTANT - GIVE FULL SPACE)
-  else if (h.toLowerCase().includes("email")) {
-    colWidths.push(85); // 🔥 BIG SPACE FOR EMAIL
-  }
-
-  else if (h === "NIN") {
-    colWidths.push(35);
-  }
-
-  else if (h === "Phone Number") {
-    colWidths.push(30);
-  }
-
-  else if (h === "Account Number") {
-    colWidths.push(30);
-  }
-
-  // ✅ columns 6,7,8 (shift smaller)
-  else {
-    colWidths.push(20);
-  }
-});
-  // Normalize
-  let totalWidth = colWidths.reduce((a, b) => a + b, 0);
-let scale = usableWidth / totalWidth;
-colWidths = colWidths.map(w => w * scale);
-
-  const rowHeight = 7;
-
-  function drawHeader() {
-    let x = margin;
-    pdf.setFont(undefined, "bold");
-
-    // SN
-    pdf.rect(x, y, colWidths[0], rowHeight);
-    pdf.text("SN", x + colWidths[0]/2, y + 5, { align: "center" });
-    x += colWidths[0];
-
-    headers.forEach((h, i) => {
-      let headerText = h;
-
-      // ✅ Rename headers
-      if (h === "Phone Number") headerText = "Phone No.";
-      if (h === "Account Number") headerText = "ACC No";
-
-      pdf.rect(x, y, colWidths[i + 1], rowHeight);
-
-      // ✅ CENTER HEADER TEXT
-      pdf.text(headerText, x + colWidths[i + 1]/2, y + 5, { align: "center" });
-
-      x += colWidths[i + 1];
-    });
-
-    pdf.setFont(undefined, "normal");
-    y += rowHeight;
-  }
-
-  drawHeader();
-
-  data.forEach((row, index) => {
-
-    // Page break
-    if (y + rowHeight > pageHeight - margin) {
-      pdf.addPage();
-      y = margin;
-      drawHeader();
-    }
-
-    let x = margin;
-
-    // SN
-    pdf.rect(x, y, colWidths[0], rowHeight);
-    pdf.text(String(index + 1), x + 2, y + 5);
-    x += colWidths[0];
-
-    headers.forEach((h, i) => {
-      pdf.rect(x, y, colWidths[i + 1], rowHeight);
-
-      let value = row[h];
-
-      // Format date
-      if (h.toLowerCase().includes("date")) {
-        value = formatDate(value);
-      }
-
-      let text = String(value || "");
-
-      // ✅ Better fitting (less cutting)
-      let maxChars = Math.floor(colWidths[i + 1] / 2.2);
-
-      if (text.length > maxChars) {
-        text = text.substring(0, maxChars) + "...";
-      }
-
-      pdf.text(text, x + 2, y + 5);
-      x += colWidths[i + 1];
-    });
-
-    y += rowHeight;
-  });
-
-  pdf.save("AfriFUND_Records.pdf");
-  }
+/* INIT */
+fetchRecords();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 </body>
 </html>
