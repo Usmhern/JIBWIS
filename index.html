@@ -264,49 +264,6 @@ setTimeout(() => {
 setInterval(checkStatus, 5000);
 checkStatus();
 
-
-// ✅ FETCH TABLE DATA (ONLY SUBMITTED DATA URL)
-fetchBtn.addEventListener("click", function () {
-  fetchBtn.textContent = "Loading...";
-
-  fetch(scriptURL)
-    .then(res => res.json())
-    .then(data => {
-      const head = document.getElementById("tableHead");
-      const body = document.getElementById("tableBody");
-
-      head.innerHTML = "";
-      body.innerHTML = "";
-
-      if (!data || data.length === 0) {
-        alert("No data found");
-        return;
-      }
-
-      let headerRow = "<tr>";
-      Object.keys(data[0]).forEach(key => {
-        headerRow += `<th>${key}</th>`;
-      });
-      headerRow += "</tr>";
-      head.innerHTML = headerRow;
-
-      data.forEach(row => {
-        let r = "<tr>";
-        Object.values(row).forEach(val => {
-          r += `<td>${val}</td>`;
-        });
-        r += "</tr>";
-        body.innerHTML += r;
-      });
-
-      document.getElementById("tableWrapper").style.display = "block";
-      fetchBtn.textContent = "Refresh Table";
-    })
-    .catch(() => {
-      alert("Error loading table data");
-      fetchBtn.textContent = "View Form Tables";
-    });
-});
   
 
     // LGAS DATA
