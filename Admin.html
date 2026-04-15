@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+<style>
+body { font-family: Arial; text-align:center; padding:20px; }
+button { padding:10px 20px; margin:10px; border:none; color:white; cursor:pointer; }
+.green { background:green; }
+.red { background:red; }
+input { padding:10px; margin:10px; }
+.box { background:#f0f0f0; padding:20px; max-width:400px; margin:auto; border-radius:10px; }
+</style>
+</head>
+
+<body>
+
+<h2>Admin Control Panel</h2>
+
+<div class="box">
+
+  <button class="green" onclick="setStatus('Active')">Activate Form</button>
+  <button class="red" onclick="setStatus('Inactive')">Deactivate Form</button>
+
+  <hr>
+
+  <h3>Schedule Form</h3>
+
+  <input type="time" id="openTime">
+  <input type="time" id="closeTime">
+
+  <br>
+
+  <button class="green" onclick="saveSchedule()">Save Schedule</button>
+
+</div>
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbwlknDt8WbBA1ckvFjNXjf05_4iiEC9KOzq83_FRLpKVoEgwnf1TnBaXHoi0tuwlQFn/exec";
+
+// 🔥 ACTIVATE / DEACTIVATE
+function setStatus(status) {
+  let fd = new FormData();
+  fd.append("action", "setStatus");
+  fd.append("status", status);
+
+  fetch(scriptURL, { method: "POST", body: fd })
+    .then(res => res.text())
+    .then(alert);
+}
+
+// 🔥 SAVE TIME SCHEDULE
+function saveSchedule() {
+  let fd = new FormData();
+  fd.append("action", "setSchedule");
+  fd.append("openTime", openTime.value);
+  fd.append("closeTime", closeTime.value);
+
+  fetch(scriptURL, { method: "POST", body: fd })
+    .then(res => res.text())
+    .then(alert);
+}
+</script>
+
+</body>
+</html>
