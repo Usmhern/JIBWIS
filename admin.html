@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AfriFUND Admin Dashboard</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #052;
+}
+
+.status {
+  text-align: center;
+  font-weight: bold;
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.green { background: green; }
+.red { background: red; }
+.blue { background: #052; }
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.small {
+  font-size: 12px;
+  text-align: center;
+  color: gray;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>AfriFUND Admin Panel</h2>
+
+<div id="statusBox" class="status">Loading status...</div>
+
+<button class="btn green" onclick="setStatus('Active')">ACTIVATE FORM</button>
+<button class="btn red" onclick="setStatus('Inactive')">DEACTIVATE FORM</button>
+
+<hr>
+
+<h3 style="text-align:center;">Schedule Form</h3>
+
+<label>Open Time</label>
+<input type="time" id="openTime">
+
+<label>Close Time</label>
+<input type="time" id="closeTime">
+
+<button class="btn blue" onclick="saveSchedule()">SAVE SCHEDULE</button>
+
+<div class="small">AfriFUND Admin Control System</div>
+
+</div>
+
+<script>
+
+const scriptURL = "https://script.google.com/macros/s/AKfycbwlknDt8WbBA1ckvFjNXjf05_4iiEC9KOzq83_FRLpKVoEgwnf1TnBaXHoi0tuwlQFn/exec";
+
+
+// 🔥 LOAD STATUS LIVE
+async function loadStatus() {
+  try {
+    const res = await fetch(scriptURL + "?settings=1");
+    const data = await res.json();
+
+    const box = document.getElementById("statusBox");
+
+    if (data.status === "Active") {
+      box.innerHTML = "🟢 FORM IS ACTIVE";
+      box.style.background = "#d4f8d4";
+      box.style.color = "green";
+    } else {
+      box.innerHTML = "🔴 FORM IS INACTIVE";
+      box.style.background = "#ffd6d6";
+      box.style.color = "red";
+    }
+
+  } catch (err) {
+    document.getElementById("statusBox").innerHTML =
+      "⚠️ Unable to load status";
+  }
+}
+
+
+// 🔥 ACTIVATE / DEACTIVATE FORM
+function setStatus(status) {
+  let fd = new FormData();
+  fd.append("action", "setStatus");
+  fd.append("status", status);
+
+  fetch(scriptURL, { method: "POST", body: fd })
+    .then(res => res.text())
+    .then(msg => {
+      alert(msg);
+      loadStatus();
+    })
+    .catch(() => alert("Error updating status"));
+}
+
+
+// 🔥 SAVE SCHEDULE
+function saveSchedule() {
+  let fd = new FormData();
+  fd.append("action", "setSchedule");
+  fd.append("openTime", document.getElementById("openTime").value);
+  fd.append("closeTime", document.getElementById("closeTime").value);
+
+  fetch(scriptURL, { method: "POST", body: fd })
+    .then(res => res.text())
+    .then(msg => alert(msg))
+    .catch(() => alert("Error saving schedule"));
+}
+
+
+// 🔄 AUTO REFRESH STATUS EVERY 5 SECONDS
+setInterval(loadStatus, 5000);
+
+// RUN ON LOAD
+loadStatus();
+
+</script>
+
+</body>
+</html>
