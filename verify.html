@@ -3,55 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AfriFUND Admin Dashboard</title>
+<title>AfriFUND Dashboard</title>
 
 <style>
-* {
-  box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
+* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+body { margin: 0; background: #f4f6f9; }
+
+/* TOP BAR */
+.topbar {
+  display: flex;
+  align-items: center;
+  background: #052;
+  color: white;
+  padding: 12px;
 }
 
-body {
-  margin: 0;
-  background: #f4f6f9;
+.menu-btn {
+  font-size: 22px;
+  cursor: pointer;
+  margin-right: 10px;
 }
 
 /* SIDEBAR */
 .sidebar {
   position: fixed;
+  top: 0;
+  left: -240px;
   width: 220px;
   height: 100%;
   background: #052;
   color: white;
   padding-top: 20px;
+  transition: 0.3s;
+  z-index: 1000;
 }
 
-.sidebar h3 {
-  text-align: center;
-  margin-bottom: 20px;
-}
+.sidebar.active { left: 0; }
+
+.sidebar h3 { text-align: center; }
 
 .sidebar a {
   display: block;
-  padding: 12px 20px;
+  padding: 12px;
   color: white;
   text-decoration: none;
 }
 
-.sidebar a:hover {
-  background: #0a7;
+.sidebar a:hover { background: #0a7; }
+
+/* OVERLAY */
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: none;
 }
+
+.overlay.active { display: block; }
 
 /* MAIN */
-.main {
-  margin-left: 220px;
-  padding: 20px;
-}
-
-h2 {
-  color: #052;
-  text-align: center;
-}
+.main { padding: 20px; }
 
 /* CONTROLS */
 .controls {
@@ -59,13 +72,10 @@ h2 {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
-/* SEARCH */
-.search-box {
-  position: relative;
-}
+.search-box { position: relative; }
 
 .search-box input {
   padding: 8px 10px 8px 35px;
@@ -75,9 +85,8 @@ h2 {
 
 .search-box span {
   position: absolute;
-  left: 10px;
   top: 8px;
-  color: #888;
+  left: 10px;
 }
 
 /* TABLE */
@@ -86,14 +95,9 @@ h2 {
   background: white;
   border-radius: 10px;
   overflow-x: auto;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 1000px;
-}
+table { width: 100%; border-collapse: collapse; }
 
 th, td {
   padding: 10px;
@@ -108,25 +112,14 @@ th {
   top: 0;
 }
 
-tr:hover {
-  background: #f1f8f1;
-}
-
 /* BUTTONS */
 button {
-  cursor: pointer;
   border: none;
   border-radius: 5px;
+  cursor: pointer;
 }
 
-.btn-download {
-  background: #052;
-  color: white;
-  padding: 8px 15px;
-}
-
-.btn-edit { background: orange; color: white; padding: 5px 10px; }
-.btn-delete { background: red; color: white; padding: 5px 10px; }
+.btn-download { background: #052; color: white; padding: 8px 15px; }
 
 /* PAGINATION */
 .pagination {
@@ -141,42 +134,31 @@ button {
   color: white;
 }
 
-.pagination .active {
-  background: #0a7;
-}
+.active { background: #0a7 !important; }
 
-/* LOADER */
-.spinner {
-  border: 4px solid #eee;
-  border-top: 4px solid #052;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 20px auto;
-  display: none;
-}
-
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
 </style>
 </head>
 
 <body>
 
+<!-- TOP BAR -->
+<div class="topbar">
+  <span class="menu-btn" onclick="toggleSidebar()">⋮</span>
+  <h3 style="margin:0;">AfriFUND Dashboard</h3>
+</div>
+
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
   <h3>AfriFUND</h3>
   <a href="#">📄 Applications</a>
   <a href="#">🛠 Admin</a>
   <a href="#">⚙ Settings</a>
 </div>
 
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
 <!-- MAIN -->
 <div class="main">
-
-<h2>AfriFUND Database</h2>
 
 <div class="controls">
 
@@ -191,20 +173,17 @@ button {
     <span id="totalCount"></span>
 
     <select id="rowsPerPage">
-      <option value="10">10</option>
-      <option value="25">25</option>
-      <option value="50">50</option>
-      <option value="100">100</option>
+      <option value="0-10">0-10</option>
+      <option value="10-25">10-25</option>
+      <option value="25-50">25-50</option>
+      <option value="50-100">50-100</option>
       <option value="all">All</option>
     </select>
   </div>
 
 </div>
 
-<div id="loader" class="spinner"></div>
-
 <div class="table-box" id="tableContainer"></div>
-
 <div class="pagination" id="pagination"></div>
 
 </div>
@@ -214,44 +193,56 @@ const scriptURL = "https://script.google.com/macros/s/AKfycbw7wt1Rok24XHEoRUJ1ru
 
 let allData = [];
 let filteredData = [];
-let currentPage = 1;
-let rowsPerPage = 10;
+let rangeMode = "0-10";
 let isTyping = false;
 
-/* FETCH */
-function fetchRecords() {
-  loader.style.display = "block";
+/* SIDEBAR */
+function toggleSidebar() {
+  sidebar.classList.toggle("active");
+  overlay.classList.toggle("active");
+}
 
+function closeSidebar() {
+  sidebar.classList.remove("active");
+  overlay.classList.remove("active");
+}
+
+/* FETCH */
+function fetchRecords(silent = false) {
   fetch(scriptURL)
     .then(res => res.json())
     .then(data => {
-      allData = data;
-      filteredData = data;
-      renderTable();
-    })
-    .finally(() => loader.style.display = "none");
+
+      if (JSON.stringify(data) !== JSON.stringify(allData)) {
+        allData = data;
+
+        let search = searchInput.value.toLowerCase();
+        filteredData = allData.filter(row =>
+          Object.values(row).join(" ").toLowerCase().includes(search)
+        );
+
+        renderTable();
+      }
+    });
 }
 
 /* SEARCH */
-searchInput.addEventListener("input", function() {
-  let value = this.value.toLowerCase();
+searchInput.addEventListener("input", function () {
+  let val = this.value.toLowerCase();
 
   filteredData = allData.filter(row =>
-    Object.values(row).join(" ").toLowerCase().includes(value)
+    Object.values(row).join(" ").toLowerCase().includes(val)
   );
 
-  currentPage = 1;
   renderTable();
 });
 
-/* TYPING CONTROL */
 searchInput.addEventListener("focus", () => isTyping = true);
 searchInput.addEventListener("blur", () => isTyping = false);
 
-/* ROW CHANGE */
-rowsPerPage.onchange = function() {
-  rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
-  currentPage = 1;
+/* RANGE */
+rowsPerPage.onchange = function () {
+  rangeMode = this.value;
   renderTable();
 };
 
@@ -259,63 +250,45 @@ rowsPerPage.onchange = function() {
 function renderTable() {
   totalCount.innerText = "Total: " + filteredData.length;
 
-  let start = (currentPage - 1) * rowsPerPage;
-  let end = rowsPerPage === "all" ? filteredData.length : start + rowsPerPage;
-  let data = rowsPerPage === "all" ? filteredData : filteredData.slice(start, end);
+  let start = 0, end = filteredData.length;
+
+  if (rangeMode !== "all") {
+    let p = rangeMode.split("-");
+    start = parseInt(p[0]);
+    end = parseInt(p[1]);
+  }
+
+  let data = filteredData.slice(start, end);
 
   if (!data.length) {
-    tableContainer.innerHTML = "No records found";
+    tableContainer.innerHTML = "No records";
     return;
   }
 
   let headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
 
-  let html = "<table><thead><tr><th>SN</th>";
+  let html = "<table><tr><th>SN</th>";
   headers.forEach(h => html += `<th>${h}</th>`);
-  html += "<th>Actions</th></tr></thead><tbody>";
+  html += "</tr>";
 
   data.forEach((row, i) => {
     html += `<tr><td>${start + i + 1}</td>`;
     headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
-    html += `<td>
-      <button class="btn-edit">Edit</button>
-      <button class="btn-delete">Delete</button>
-    </td></tr>`;
+    html += "</tr>";
   });
 
-  html += "</tbody></table>";
+  html += "</table>";
   tableContainer.innerHTML = html;
-
-  renderPagination(filteredData.length);
 }
 
-/* PAGINATION */
-function renderPagination(total) {
-  if (rowsPerPage === "all") return pagination.innerHTML = "";
-
-  let pages = Math.ceil(total / rowsPerPage);
-  let html = "";
-
-  for (let i = 1; i <= pages; i++) {
-    html += `<button class="${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
-  }
-
-  pagination.innerHTML = html;
-}
-
-function goPage(p) {
-  currentPage = p;
-  renderTable();
-}
-
-/* AUTO REFRESH */
+/* AUTO REFRESH (SILENT) */
 setInterval(() => {
-  if (!isTyping) fetchRecords();
+  if (!isTyping) fetchRecords(true);
 }, 5000);
 
 /* PDF */
 function downloadPDF() {
-  alert("PDF logic already in your system");
+  alert("PDF already integrated in your full system");
 }
 
 /* INIT */
