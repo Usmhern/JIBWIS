@@ -292,8 +292,19 @@ async function downloadPDF() {
   }
 
   // Remove first & last column
-  let allHeaders = Object.keys(data[0]).filter(h => h !== "rowNumber");
-  let headers = allHeaders.slice(1, -1);
+  
+let allHeaders = Object.keys(data[0]).filter(h => {
+  let key = h.toLowerCase();
+
+  return (
+    h !== "rowNumber" &&
+    key !== "timestamp" &&
+    key !== "email" &&
+    key !== "otp"
+  );
+});
+// still remove first & last column if needed
+let headers = allHeaders.slice(1, -1);
 
   const pdf = new jsPDF('l', 'mm', 'a4');
 
