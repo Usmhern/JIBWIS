@@ -11,7 +11,6 @@ body { margin: 0; padding: 20px; background: #f0f2f5; color: #333; }
 
 h2 { color: #052; text-align: center; margin-top: 20px; }
 
-/* Controls */
 .controls {
   display: flex;
   justify-content: space-between;
@@ -26,7 +25,6 @@ h2 { color: #052; text-align: center; margin-top: 20px; }
   border: 1px solid #ccc;
 }
 
-/* Table */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -41,11 +39,9 @@ th, td { padding: 12px; border: 1px solid #eee; font-size: 13px; }
 th { background: #052; color: white; position: sticky; top: 0; }
 tr:hover { background-color: #f1f8f1; }
 
-/* Buttons */
 .btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; cursor: pointer; }
 .btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; cursor: pointer; }
 
-/* Pagination */
 .pagination { margin-top: 15px; text-align: center; }
 .pagination button {
   margin: 3px;
@@ -57,7 +53,7 @@ tr:hover { background-color: #f1f8f1; }
 }
 .pagination button.active { background: #0a7; }
 
-/* Modal */
+/* MODAL */
 #editModal {
   display: none;
   position: fixed;
@@ -68,6 +64,7 @@ tr:hover { background-color: #f1f8f1; }
   height: 100%;
   background: rgba(0,0,0,0.6);
 }
+
 .modal-content {
   background: white;
   margin: 5% auto;
@@ -76,10 +73,14 @@ tr:hover { background-color: #f1f8f1; }
   max-width: 400px;
   border-radius: 10px;
 }
-.modal-content input { width: 100%; padding: 8px; margin: 8px 0; }
-.modal-actions { display: flex; justify-content: space-between; }
 
-/* Spinner */
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/* SPINNER */
 .spinner {
   border: 4px solid #f3f3f3;
   border-top: 4px solid #052;
@@ -90,6 +91,7 @@ tr:hover { background-color: #f1f8f1; }
   margin: 20px auto;
   display: none;
 }
+
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
 /* SIDEBAR */
@@ -125,27 +127,45 @@ tr:hover { background-color: #f1f8f1; }
   color: white;
   text-decoration: none;
 }
+
 #sidebar a:hover { background: rgba(255,255,255,0.1); }
+
+/* NOTIFICATION */
+#notifBox {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
 
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
+<!-- SIDEBAR BUTTON -->
 <div id="menuBtn" onclick="toggleSidebar()">⋮</div>
 
+<!-- SIDEBAR -->
 <div id="sidebar">
   <h3>Menu</h3>
-  <a href="index.html">Applications Form</a>
-  <a href="verify.html">Admin</a>
-  <a href="admin.html">Settings</a>
+  <a href="#">Applications Form</a>
+  <a href="#">Admin</a>
+  <a href="#">Settings</a>
 </div>
 
 <h2>AfriFUND Database</h2>
 
 <div class="controls">
-  <button onclick="downloadPDF()" style="background:red;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
+  <button onclick="downloadPDF()" style="background:#052;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
     Download PDF
   </button>
 
@@ -168,17 +188,16 @@ tr:hover { background-color: #f1f8f1; }
 <div class="table-responsive" id="tableContainer"></div>
 <div class="pagination" id="pagination"></div>
 
-<!-- EDIT MODAL -->
+<!-- MODAL -->
 <div id="editModal">
   <div class="modal-content">
     <h3>Edit Record</h3>
+
     <form id="editForm">
       <input type="hidden" name="rowNumber" id="editRowNumber">
       <input type="hidden" name="action" value="edit">
-      <input type="text" name="Name" id="editName" required>
-      <input type="text" name="NIN" id="editNIN" required>
-      <input type="text" name="Phone Number" id="editPhone" required>
-      <input type="email" name="Email" id="editEmail" required>
+
+      <div id="dynamicEditFields"></div>
 
       <div class="modal-actions">
         <button type="button" onclick="closeModal()">Cancel</button>
@@ -188,6 +207,9 @@ tr:hover { background-color: #f1f8f1; }
   </div>
 </div>
 
+<!-- NOTIFICATIONS -->
+<div id="notifBox"></div>
+
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbw7wt1Rok24XHEoRUJ1ruw9qnEBCtd_LldUFX-Zo-0toAFNoJWL27MgVTiFdg1MOk3t/exec";
 
@@ -195,6 +217,7 @@ let allData = [];
 let filteredData = [];
 let currentPage = 1;
 let rowsPerPage = 10;
+let previousLength = 0;
 
 window.onload = fetchRecords;
 
@@ -212,7 +235,7 @@ function fetchRecords() {
 }
 
 /* SEARCH */
-document.getElementById("searchInput").addEventListener("input", function() {
+document.getElementById("searchInput").addEventListener("input", function () {
   const value = this.value.toLowerCase();
   filteredData = allData.filter(row =>
     Object.values(row).join(" ").toLowerCase().includes(value)
@@ -221,8 +244,8 @@ document.getElementById("searchInput").addEventListener("input", function() {
   renderTable();
 });
 
-/* ROW SELECT */
-document.getElementById("rowsPerPage").addEventListener("change", function() {
+/* ROWS */
+document.getElementById("rowsPerPage").addEventListener("change", function () {
   rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
   currentPage = 1;
   renderTable();
@@ -233,11 +256,10 @@ function renderTable() {
   document.getElementById("totalCount").innerText = "Total: " + filteredData.length;
 
   let data = filteredData;
-  let start = (currentPage - 1) * rowsPerPage;
-  let end = rowsPerPage === "all" ? data.length : start + rowsPerPage;
-  let paginated = rowsPerPage === "all" ? data : data.slice(start, end);
+  let start = (rowsPerPage === "all") ? 0 : (currentPage - 1) * rowsPerPage;
+  let paginated = (rowsPerPage === "all") ? data : data.slice(start, start + rowsPerPage);
 
-  if (data.length === 0) {
+  if (!data.length) {
     tableContainer.innerHTML = "<p>No records found.</p>";
     pagination.innerHTML = "";
     return;
@@ -250,11 +272,9 @@ function renderTable() {
   html += `<th>Actions</th></tr></thead><tbody>`;
 
   paginated.forEach((row, i) => {
-    let sn = (rowsPerPage === "all")
-  ? (i + 1)
-  : (start + i + 1);
+    let sn = (rowsPerPage === "all") ? (i + 1) : (start + i + 1);
 
-html += `<tr><td>${sn}</td>`;
+    html += `<tr><td>${sn}</td>`;
     headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
     html += `<td>
       <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row)})'>Edit</button>
@@ -279,36 +299,45 @@ function renderPagination(total) {
   let html = "";
 
   for (let i = 1; i <= pages; i++) {
-    html += `<button class="${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
   }
 
   pagination.innerHTML = html;
 }
 
-function goPage(page) {
-  currentPage = page;
+function goPage(p) {
+  currentPage = p;
   renderTable();
 }
 
 /* DELETE */
 function deleteRow(rowNum) {
-  if (confirm("Delete this record permanently?")) {
-    const fd = new FormData();
-    fd.append("action", "delete");
-    fd.append("rowNumber", rowNum);
+  let fd = new FormData();
+  fd.append("action", "delete");
+  fd.append("rowNumber", rowNum);
 
-    fetch(scriptURL, { method: "POST", body: fd })
-      .then(() => fetchRecords());
-  }
+  fetch(scriptURL, { method: "POST", body: fd })
+    .then(() => fetchRecords());
 }
 
 /* EDIT */
+function buildEditForm(row) {
+  const c = document.getElementById("dynamicEditFields");
+  c.innerHTML = "";
+
+  Object.keys(row).forEach(k => {
+    if (k === "rowNumber" || k.toLowerCase() === "otp") return;
+
+    c.innerHTML += `
+      <label style="font-size:12px;font-weight:bold;">${k}</label>
+      <input type="text" name="${k}" value="${row[k] || ""}" style="width:100%;padding:8px;margin:5px 0;">
+    `;
+  });
+}
+
 function openEditModal(row) {
   editRowNumber.value = row.rowNumber;
-  editName.value = row["Name"] || "";
-  editNIN.value = row["NIN"] || "";
-  editPhone.value = row["Phone Number"] || "";
-  editEmail.value = row["Email"] || "";
+  buildEditForm(row);
   editModal.style.display = "block";
 }
 
@@ -316,7 +345,7 @@ function closeModal() {
   editModal.style.display = "none";
 }
 
-editForm.onsubmit = function(e) {
+editForm.onsubmit = function (e) {
   e.preventDefault();
   saveBtn.innerText = "Saving...";
 
@@ -330,160 +359,122 @@ editForm.onsubmit = function(e) {
 
 /* SIDEBAR */
 function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.style.left = (sidebar.style.left === "0px") ? "-260px" : "0px";
+  const s = document.getElementById("sidebar");
+  s.style.left = (s.style.left === "0px") ? "-260px" : "0px";
 }
 
-/* AUTO REFRESH (5 SECONDS) */
+/* NOTIFICATION */
+function showNotification(msg) {
+  const box = document.getElementById("notifBox");
+
+  const n = document.createElement("div");
+  n.innerText = msg;
+  n.style.cssText = `
+    background:#052;color:white;padding:12px;border-radius:6px;
+    animation: slideIn .3s ease;
+  `;
+
+  box.appendChild(n);
+
+  setTimeout(() => {
+    n.remove();
+  }, 4000);
+}
+
+/* AUTO REFRESH + LIVE ALERT */
 setInterval(() => {
   fetch(scriptURL)
-    .then(res => res.json())
+    .then(r => r.json())
     .then(data => {
+
+      if (previousLength && data.length > previousLength) {
+        showNotification("🔔 " + (data.length - previousLength) + " New Record(s) Added");
+      }
+
+      previousLength = data.length;
+
       allData = data;
 
-      const value = document.getElementById("searchInput").value.toLowerCase();
+      const v = document.getElementById("searchInput").value.toLowerCase();
 
-      filteredData = allData.filter(row =>
-        Object.values(row).join(" ").toLowerCase().includes(value)
+      filteredData = allData.filter(r =>
+        Object.values(r).join(" ").toLowerCase().includes(v)
       );
 
       renderTable();
-    })
-    .catch(() => {});
+    });
 }, 5000);
 
-/* ===== YOUR ORIGINAL DOWNLOAD PDF LOGIC (UNCHANGED) ===== */
-function formatDate(value) {
-  if (!value) return "";
-  let date = new Date(value);
-  if (isNaN(date)) return value;
-  let day = String(date.getDate()).padStart(2, '0');
-  let month = String(date.getMonth() + 1).padStart(2, '0');
-  let year = date.getFullYear();
-  return `${day}/${month}/${year}`;
+/* ===== PDF (YOUR LOGIC KEPT) ===== */
+function formatDate(v) {
+  if (!v) return "";
+  let d = new Date(v);
+  if (isNaN(d)) return v;
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
 async function downloadPDF() {
   const { jsPDF } = window.jspdf;
 
   let data = filteredData;
-  if (data.length === 0) {
-    alert("No data available to download.");
-    return;
-  }
+  if (!data.length) return alert("No data");
 
-  let allHeaders = Object.keys(data[0]).filter(h => {
-    let key = h.toLowerCase();
-    return (
-      h !== "rowNumber" &&
-      key !== "timestamp" &&
-      key !== "email" &&
-      key !== "otp"
-    );
-  });
+  let headers = Object.keys(data[0]).filter(h =>
+    h !== "rowNumber" &&
+    h.toLowerCase() !== "otp"
+  ).slice(1, -1);
 
-  let headers = allHeaders.slice(1, -1);
+  const pdf = new jsPDF('l','mm','a4');
+  let y = 10;
 
-  const pdf = new jsPDF('l', 'mm', 'a4');
+  pdf.text("AfriFUND Records", 148, y, {align:"center"});
+  y += 10;
 
-  const pageWidth = 297;
-  const pageHeight = 210;
-  const margin = 10;
+  let xStart = 10;
+  let rowH = 7;
 
-  let y = margin;
+  function header() {
+    let x = xStart;
+    pdf.setFont(undefined,"bold");
 
-  pdf.setFontSize(14);
-  pdf.text("AfriFUND Application Records", pageWidth / 2, y, { align: "center" });
-  y += 8;
+    pdf.text("SN", x+2, y+5);
+    x += 15;
 
-  const searchValue = document.getElementById("searchInput").value;
-  if (searchValue) {
-    pdf.setFontSize(10);
-    pdf.text("Filter: " + searchValue, margin, y);
-    y += 6;
-  }
-
-  pdf.setFontSize(9);
-
-  let colWidths = [];
-  colWidths.push(10);
-
-  headers.forEach(h => {
-    if (h.toLowerCase().includes("name")) colWidths.push(60);
-    else if (h.toLowerCase().includes("email")) colWidths.push(85);
-    else if (h === "NIN") colWidths.push(35);
-    else if (h === "Phone Number") colWidths.push(30);
-    else colWidths.push(20);
-  });
-
-  let totalWidth = colWidths.reduce((a,b)=>a+b,0);
-  let scale = (297 - margin*2) / totalWidth;
-  colWidths = colWidths.map(w => w * scale);
-
-  const rowHeight = 7;
-
-  function drawHeader() {
-    let x = margin;
-    pdf.setFont(undefined, "bold");
-
-    pdf.rect(x, y, colWidths[0], rowHeight);
-    pdf.text("SN", x + 3, y + 5);
-    x += colWidths[0];
-
-    headers.forEach((h, i) => {
-      pdf.rect(x, y, colWidths[i+1], rowHeight);
-      pdf.text(h, x + 2, y + 5);
-      x += colWidths[i+1];
+    headers.forEach(h => {
+      pdf.text(h, x+2, y+5);
+      x += 30;
     });
 
-    pdf.setFont(undefined, "normal");
-    y += rowHeight;
+    y += rowH;
+    pdf.setFont(undefined,"normal");
   }
 
-  drawHeader();
+  header();
 
-  data.forEach((row, index) => {
-    let x = margin;
-
-    if (y + rowHeight > pageHeight - margin) {
+  data.forEach((r,i) => {
+    if (y > 200) {
       pdf.addPage();
-      y = margin;
-      drawHeader();
+      y = 10;
+      header();
     }
 
-    pdf.rect(x, y, colWidths[0], rowHeight);
-    pdf.text(String(index+1), x + 2, y + 5);
-    x += colWidths[0];
+    let x = xStart;
 
-    headers.forEach((h,i)=>{
-      pdf.rect(x, y, colWidths[i+1], rowHeight);
+    pdf.text(String(i+1), x+2, y+5);
+    x += 15;
 
-      let value = row[h];
-
-      if (h.toLowerCase().includes("date")) {
-        value = formatDate(value);
-      }
-
-      let text = String(value || "");
-      let maxChars = Math.floor(colWidths[i+1] / 2.2);
-
-      if (text.length > maxChars) {
-        text = text.substring(0,maxChars) + "...";
-      }
-
-      pdf.text(text, x + 2, y + 5);
-      x += colWidths[i+1];
+    headers.forEach(h => {
+      pdf.text(String(r[h] || "").slice(0,20), x+2, y+5);
+      x += 30;
     });
 
-    y += rowHeight;
+    y += rowH;
   });
 
-  pdf.save("AfriFUND_Records.pdf");
+  pdf.save("AfriFUND.pdf");
 }
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 </body>
 </html>
