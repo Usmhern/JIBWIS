@@ -157,154 +157,25 @@
 
       <button class="register-btn" id="submitBtn" type="submit">Submit</button>
     </form>
-    
-    <button class="fetch-btn" id="fetchBtn">View Form Tables</button>
-  </div>
 
-  <div class="table-wrapper" id="tableWrapper">
-    <table id="dataTable">
-      <thead id="tableHead"></thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
 
   <script>
-    /*
-
-    
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbymwKgIOx7Zfy_7ux3XNElKiFG0pRYl65isN-zRyuUeFRHLQhoThK8dfGqjZtsWoFHq/exec';
-    const form = document.getElementById('myForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const fetchBtn = document.getElementById('fetchBtn');
-
-    // SUBMIT DATA
-   /* form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      submitBtn.classList.add('blinking');
-      submitBtn.textContent = 'Processing...';
-
-      fetch(scriptURL, { method: 'POST', body: new FormData(form) })
-      .then(response => {
-        alert("Submitted Successfully!");
-        form.reset();
-      })
-      .catch(error => alert("Error submitting form!"))
-      .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('blinking');
-        submitBtn.textContent = 'Submit';
-      });
-    });*/
-
-    
-/*const scriptURL2 = "https://script.google.com/macros/s/AKfycbwT49hK5zL3fEAD_BtlOBPRcLOuPIBW9AnullI4RmGH8TsBFq1xvmrRVB_Hbndo0I7z/exec";
-
-// 🔥 CHECK STATUS
-async function checkStatus() {
-  const res = await fetch(scriptURL2 + "?settings=1");
-  const data = await res.json();
-
-  const box = document.getElementById("statusBox");
-
-  if (data.status === "Active") {
-    box.innerHTML = "🟢 Application is OPEN";
-    box.style.color = "green";
-  } else {
-    box.innerHTML = "🔴 Application is CLOSED";
-    box.style.color = "red";
-  }
-
-  return data.status;
-}
-
-// 🔥 FORM SUBMIT CONTROL
-document.getElementById("myForm").onsubmit = async function(e) {
-  e.preventDefault();
-
-  let status = await checkStatus();
-
-  if (status !== "Active") {
-    alert("Application is currently closed.");
-    return;
-  }
-
-  fetch(scriptURL2, {
-    method: "POST",
-    body: new FormData(this)
-  })
-  .then(res => res.text())
-  .then(msg => {
-    alert(msg);
-    this.reset();
-  });
-    };
-  async function checkStatus() {
-  try {
-    const res = await fetch(scriptURL + "?settings=1");
-    const data = await res.json();
-
-    const box = document.getElementById("statusBox");
-
-    if (data.status === "Active") {
-      box.innerHTML = "🟢 APPLICATION IS OPEN";
-      box.style.color = "green";
-    } else {
-      box.innerHTML = "🔴 APPLICATION IS CLOSED";
-      box.style.color = "red";
-    }
-
-    return data.status;
-  } catch (error) {
-    document.getElementById("statusBox").innerHTML =
-      "⚠️ SYSTEM ERROR";
-  }
-}
-  setInterval(checkStatus, 5000);
-    // FETCH DATA
-    fetchBtn.addEventListener('click', function() {
-      fetchBtn.textContent = "Loading...";
-      fetch(scriptURL)
-      .then(res => res.json())
-      .then(data => {
-        if (data.length === 0) { alert("No data found!"); return; }
-        
-        const head = document.getElementById('tableHead');
-        const body = document.getElementById('tableBody');
-        head.innerHTML = ""; body.innerHTML = "";
-
-        // Headers
-        let headerRow = "<tr>";
-        Object.keys(data[0]).forEach(key => headerRow += `<th>${key}</th>`);
-        head.innerHTML = headerRow + "</tr>";
-
-        // Rows
-        data.forEach(row => {
-          let r = "<tr>";
-          Object.values(row).forEach(val => r += `<td>${val}</td>`);
-          body.innerHTML += r + "</tr>";
-        });
-
-        document.getElementById('tableWrapper').style.display = "block";
-        fetchBtn.textContent = "Refresh Table";
-      })
-      .catch(err => alert("Could not load table. Ensure your Google Script returns JSON."));
-    });*/
-
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlknDt8WbBA1ckvFjNXjf05_4iiEC9KOzq83_FRLpKVoEgwnf1TnBaXHoi0tuwlQFn/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbwlknDt8WbBA1ckvFjNXjf05_4iiEC9KOzq83_FRLpKVoEgwnf1TnBaXHoi0tuwlQFn/exec"; 
+const adminURL  = "https://script.google.com/macros/s/AKfycbwT49hK5zL3fEAD_BtlOBPRcLOuPIBW9AnullI4RmGH8TsBFq1xvmrRVB_Hbndo0I7z/exec";
 
 const form = document.getElementById("myForm");
 const submitBtn = document.getElementById("submitBtn");
 const fetchBtn = document.getElementById("fetchBtn");
 const statusBox = document.getElementById("statusBox");
 
-// ========================
-// CHECK FORM STATUS
-// ========================
+
+// ✅ CHECK ADMIN STATUS (ACTIVE / INACTIVE)
 async function checkStatus() {
   try {
-    const res = await fetch(SCRIPT_URL + "?action=status");
+    const res = await fetch(adminURL + "?settings=1");
     const data = await res.json();
+
+    if (!statusBox) return data.status;
 
     if (data.status === "Active") {
       statusBox.innerHTML = "🟢 APPLICATION IS OPEN";
@@ -315,39 +186,29 @@ async function checkStatus() {
     }
 
     return data.status;
+
   } catch (err) {
-    statusBox.innerHTML = "⚠️ SYSTEM ERROR";
-    statusBox.style.color = "orange";
+    if (statusBox) {
+      statusBox.innerHTML = "⚠️ SYSTEM ERROR";
+      statusBox.style.color = "orange";
+    }
     return "Error";
   }
 }
 
-// run status every 5 seconds
-setInterval(checkStatus, 5000);
-checkStatus();
 
-
-// ========================
-// FORM SUBMIT
-// ========================
-form.addEventListener("submit", async function(e) {
+// ✅ FORM SUBMIT (USES ADMIN STATUS)
+form.onsubmit = async function(e) {
   e.preventDefault();
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Checking...";
 
   const status = await checkStatus();
 
   if (status !== "Active") {
     alert("Application is currently closed.");
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Submit";
     return;
   }
 
-  submitBtn.textContent = "Submitting...";
-
-  fetch(SCRIPT_URL, {
+  fetch(scriptURL, {
     method: "POST",
     body: new FormData(form)
   })
@@ -356,21 +217,20 @@ form.addEventListener("submit", async function(e) {
     alert(msg);
     form.reset();
   })
-  .catch(() => alert("Submission error"))
-  .finally(() => {
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Submit";
-  });
-});
+  .catch(() => alert("Submission failed"));
+};
 
 
-// ========================
-// FETCH TABLE DATA
-// ========================
-fetchBtn.addEventListener("click", function() {
+// ✅ LIVE STATUS UPDATE
+setInterval(checkStatus, 5000);
+checkStatus();
+
+
+// ✅ FETCH TABLE DATA (ONLY SUBMITTED DATA URL)
+fetchBtn.addEventListener("click", function () {
   fetchBtn.textContent = "Loading...";
 
-  fetch(SCRIPT_URL + "?action=data")
+  fetch(scriptURL)
     .then(res => res.json())
     .then(data => {
       const head = document.getElementById("tableHead");
@@ -379,19 +239,23 @@ fetchBtn.addEventListener("click", function() {
       head.innerHTML = "";
       body.innerHTML = "";
 
-      if (!data.length) {
+      if (!data || data.length === 0) {
         alert("No data found");
         return;
       }
 
       let headerRow = "<tr>";
-      Object.keys(data[0]).forEach(k => headerRow += `<th>${k}</th>`);
+      Object.keys(data[0]).forEach(key => {
+        headerRow += `<th>${key}</th>`;
+      });
       headerRow += "</tr>";
       head.innerHTML = headerRow;
 
       data.forEach(row => {
         let r = "<tr>";
-        Object.values(row).forEach(v => r += `<td>${v}</td>`);
+        Object.values(row).forEach(val => {
+          r += `<td>${val}</td>`;
+        });
         r += "</tr>";
         body.innerHTML += r;
       });
@@ -400,10 +264,12 @@ fetchBtn.addEventListener("click", function() {
       fetchBtn.textContent = "Refresh Table";
     })
     .catch(() => {
-      alert("Error loading data");
+      alert("Error loading table data");
       fetchBtn.textContent = "View Form Tables";
     });
 });
+  
+
     // LGAS DATA
     const lgas = {
       "Abia": ["Aba North", "Aba South", "Arochukwu", "Bende", "Ikwuano", "Isiala Ngwa North", "Isiala Ngwa South", "Isuikwuato", "Obi Ngwa", "Ohafia", "Osisioma", "Ugwunagbo", "Ukwa East", "Ukwa West", "Umuahia North", "Umuahia South", "Umu Nneochi"],
