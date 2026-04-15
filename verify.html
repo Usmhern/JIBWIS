@@ -165,7 +165,7 @@ tr:hover { background-color: #f1f8f1; }
 <h2>AfriFUND Database</h2>
 
 <div class="controls">
-  <button onclick="downloadPDF()" style="background:red;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
+  <button onclick="downloadPDF()" style="background:navy;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
     Download PDF
   </button>
 
@@ -412,92 +412,169 @@ function formatDate(v) {
   if (isNaN(d)) return v;
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
-async function downloadPDF() {
-  const { jsPDF } = window.jspdf;
+    async function downloadPDF() {
+const { jsPDF } = window.jspdf;
 
-  let data = filteredData;
-  if (!data.length) return alert("No data");
-
-  let headers = Object.keys(data[0]).filter(h =>
-    h !== "rowNumber" &&
-    h.toLowerCase() !== "otp"
-  ).slice(1, -1);
-
-  const pdf = new jsPDF('l','mm','a4');
-
-  const pageWidth = 297;
-  const margin = 10;
-  let y = 15;
-
-  const rowHeight = 8;
-
-  pdf.setFontSize(14);
-  pdf.text("AfriFUND Records", pageWidth/2, 10, {align:"center"});
-
-  /* COLUMN WIDTHS */
-  let colWidths = [10]; // SN
-
-  headers.forEach(() => colWidths.push(35));
-
-  let total = colWidths.reduce((a,b)=>a+b,0);
-  let scale = (pageWidth - margin*2) / total;
-  colWidths = colWidths.map(w => w * scale);
-
-  function drawHeader() {
-    let x = margin;
-    pdf.setFont(undefined,"bold");
-
-    // SN
-    pdf.rect(x,y,colWidths[0],rowHeight);
-    pdf.text("SN", x+2, y+5);
-    x += colWidths[0];
-
-    headers.forEach((h,i)=>{
-      pdf.rect(x,y,colWidths[i+1],rowHeight);
-      pdf.text(h, x+2, y+5);
-      x += colWidths[i+1];
-    });
-
-    pdf.setFont(undefined,"normal");
-    y += rowHeight;
-  }
-
-  drawHeader();
-
-  data.forEach((row,i)=>{
-
-    if (y + rowHeight > 200) {
-      pdf.addPage();
-      y = 15;
-      drawHeader();
-    }
-
-    let x = margin;
-
-    // SN cell
-    pdf.rect(x,y,colWidths[0],rowHeight);
-    pdf.text(String(i+1), x+3, y+5);
-    x += colWidths[0];
-
-    headers.forEach((h,j)=>{
-      pdf.rect(x,y,colWidths[j+1],rowHeight);
-
-      let value = String(row[h] || "");
-
-      // trim long text
-      if (value.length > 25) {
-        value = value.substring(0,25) + "...";
-      }
-
-      pdf.text(value, x+2, y+5);
-      x += colWidths[j+1];
-    });
-
-    y += rowHeight;
-  });
-
-  pdf.save("AfriFUND_Records.pdf");
+let data = filteredData;
+if (data.length === 0) {
+alert("No data available to download.");
+return;
 }
+
+// Remove first & last column
+
+let allHeaders = Object.keys(data[0]).filter(h => {
+let key = h.toLowerCase();
+
+return (
+h !== "rowNumber" &&
+key !== "timestamp" &&
+key !== "email" &&
+key !== "otp"
+);
+});
+// still remove first & last column if needed
+let headers = allHeaders.slice(1, -1);
+
+const pdf = new jsPDF('l', 'mm', 'a4');
+
+const pageWidth = 297;
+const pageHeight = 210;
+const margin = 10;
+const usableWidth = pageWidth - margin * 2;
+
+let y = margin;
+
+// Title
+pdf.setFontSize(14);
+pdf.text("AfriFUND Application Records", pageWidth / 2, y, { align: "center" });
+y += 8;
+
+const searchValue = document.getElementById("searchInput").value;
+if (searchValue) {
+pdf.setFontSize(10);
+pdf.text("Filter: " + searchValue, margin, y);
+y += 6;
+}
+
+pdf.setFontSize(9);
+
+// ✅ SMART COLUMN WIDTHS
+let colWidths = [];
+colWidths.push(10); // SN
+
+headers.forEach(h => {
+
+// ✅ NAME (2nd column)
+if (h.toLowerCase().includes("name")) {
+colWidths.push(60);
+}
+
+// ✅ EMAIL (VERY IMPORTANT - GIVE FULL SPACE)
+else if (h.toLowerCase().includes("email")) {
+colWidths.push(85); // 🔥 BIG SPACE FOR EMAIL
+}
+
+else if (h === "NIN") {
+colWidths.push(35);
+}
+
+else if (h === "Phone Number") {
+colWidths.push(30);
+}
+
+else if (h === "Account Number") {
+colWidths.push(30);
+}
+
+// ✅ columns 6,7,8 (shift smaller)
+else {
+colWidths.push(20);
+}
+});
+// Normalize
+let totalWidth = colWidths.reduce((a, b) => a + b, 0);
+let scale = usableWidth / totalWidth;
+colWidths = colWidths.map(w => w * scale);
+
+const rowHeight = 7;
+
+function drawHeader() {
+let x = margin;
+pdf.setFont(undefined, "bold");
+
+// SN    
+pdf.rect(x, y, colWidths[0], rowHeight);    
+pdf.text("SN", x + colWidths[0]/2, y + 5, { align: "center" });    
+x += colWidths[0];    
+
+headers.forEach((h, i) => {    
+  let headerText = h;    
+
+  // ✅ Rename headers    
+  if (h === "Phone Number") headerText = "Phone No.";    
+  if (h === "Account Number") headerText = "ACC No";    
+
+  pdf.rect(x, y, colWidths[i + 1], rowHeight);    
+
+  // ✅ CENTER HEADER TEXT    
+  pdf.text(headerText, x + colWidths[i + 1]/2, y + 5, { align: "center" });    
+
+  x += colWidths[i + 1];    
+});    
+
+pdf.setFont(undefined, "normal");    
+y += rowHeight;
+
+}
+
+drawHeader();
+
+data.forEach((row, index) => {
+
+// Page break    
+if (y + rowHeight > pageHeight - margin) {    
+  pdf.addPage();    
+  y = margin;    
+  drawHeader();    
+}    
+
+let x = margin;    
+
+// SN    
+pdf.rect(x, y, colWidths[0], rowHeight);    
+pdf.text(String(index + 1), x + 2, y + 5);    
+x += colWidths[0];    
+
+headers.forEach((h, i) => {    
+  pdf.rect(x, y, colWidths[i + 1], rowHeight);    
+
+  let value = row[h];    
+
+  // Format date    
+  if (h.toLowerCase().includes("date")) {    
+    value = formatDate(value);    
+  }    
+
+  let text = String(value || "");    
+
+  // ✅ Better fitting (less cutting)    
+  let maxChars = Math.floor(colWidths[i + 1] / 2.2);    
+
+  if (text.length > maxChars) {    
+    text = text.substring(0, maxChars) + "...";    
+  }    
+
+  pdf.text(text, x + 2, y + 5);    
+  x += colWidths[i + 1];    
+});    
+
+y += rowHeight;
+
+});
+
+pdf.save("AfriFUND_Records.pdf");
+  }
 
 </script>
 
