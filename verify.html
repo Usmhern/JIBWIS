@@ -3,284 +3,358 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AfriFUND Dashboard</title>
+<title>Data Center - Manage Records</title>
 
 <style>
 * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-body { margin: 0; background: #f4f6f9; }
+body { margin: 0; padding: 20px; background: #f0f2f5; color: #333; }
 
-/* TOP BAR */
-.topbar {
-  display: flex;
-  align-items: center;
-  background: #052;
-  color: white;
-  padding: 12px;
-}
+h2 { color: #052; text-align: center; margin-top: 20px; }
 
-.menu-btn { font-size: 22px; cursor: pointer; margin-right: 10px; }
-
-/* SIDEBAR */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -240px;
-  width: 220px;
-  height: 100%;
-  background: #052;
-  color: white;
-  padding-top: 20px;
-  transition: 0.3s;
-}
-
-.sidebar.active { left: 0; }
-
-.sidebar a {
-  display: block;
-  padding: 12px;
-  color: white;
-  text-decoration: none;
-}
-
-.sidebar a:hover { background: #0a7; }
-
-/* OVERLAY */
-.overlay {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
-  display: none;
-}
-
-.overlay.active { display: block; }
-
-/* MAIN */
-.main { padding: 20px; }
-
-/* CONTROLS */
+/* Controls */
 .controls {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
+  margin-top: 20px;
   gap: 10px;
 }
 
-.search-box { position: relative; }
-
-.search-box input {
-  padding: 8px 10px 8px 35px;
-  border: 1px solid #ccc;
+.controls input, .controls select {
+  padding: 8px;
   border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
-.search-box span {
-  position: absolute;
-  top: 8px;
-  left: 10px;
-}
-
-/* TABLE */
-.table-box {
-  margin-top: 15px;
+/* Table */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
   background: white;
   border-radius: 10px;
-  overflow-x: auto;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-top: 10px;
 }
 
-table { width: 100%; border-collapse: collapse; }
+table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+th, td { padding: 12px; border: 1px solid #eee; font-size: 13px; }
+th { background: #052; color: white; position: sticky; top: 0; }
+tr:hover { background-color: #f1f8f1; }
 
-th, td {
-  padding: 10px;
-  border: 1px solid #eee;
-  font-size: 13px;
-}
+/* Buttons */
+.btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; cursor: pointer; }
+.btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; cursor: pointer; }
 
-th {
-  background: #052;
-  color: white;
-}
-
-/* BUTTON */
-.btn-download {
-  background: #052;
-  color: white;
-  padding: 8px 15px;
-  border-radius: 5px;
+/* Pagination */
+.pagination { margin-top: 15px; text-align: center; }
+.pagination button {
+  margin: 3px;
+  padding: 6px 10px;
   border: none;
+  background: #052;
+  color: white;
   cursor: pointer;
+}
+.pagination button.active { background: #0a7; }
+
+/* Modal */
+#editModal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+}
+.modal-content {
+  background: white;
+  margin: 5% auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 10px;
+}
+.modal-content input { width: 100%; padding: 8px; margin: 8px 0; }
+.modal-actions { display: flex; justify-content: space-between; }
+
+/* Spinner */
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #052;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+  display: none;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* ===== SIDE NAVIGATION (ADDED) ===== */
+#menuBtn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 4000;
+  background: #052;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 5px;
+}
+
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -260px;
+  width: 250px;
+  height: 100%;
+  background: #052;
+  color: white;
+  padding: 20px;
+  transition: 0.3s;
+  z-index: 3500;
+}
+
+#sidebar a {
+  display: block;
+  padding: 10px;
+  color: white;
+  text-decoration: none;
+}
+
+#sidebar a:hover {
+  background: rgba(255,255,255,0.1);
 }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-  <span class="menu-btn" onclick="toggleSidebar()">⋮</span>
-  <h3>AfriFUND Dashboard</h3>
+<!-- SIDEBAR BUTTON -->
+<div id="menuBtn" onclick="toggleSidebar()">⋮</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <h3>Menu</h3>
+  <a href="#">Applications Form</a>
+  <a href="#">Admin</a>
+  <a href="#">Settings</a>
 </div>
 
-<div class="sidebar" id="sidebar">
-  <a href="index.html">📄 Applications</a>
-  <a href="verify.html">🛠 Admin</a>
-  <a href="admin.html">⚙ Settings</a>
-</div>
-
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-<div class="main">
+<h2>AfriFUND Database</h2>
 
 <div class="controls">
-  <button class="btn-download" onclick="downloadPDF()">⬇ Download PDF</button>
+  <button onclick="downloadPDF()" style="background:#052;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
+    Download PDF
+  </button>
 
-  <div class="search-box">
-    <span>🔍</span>
-    <input type="text" id="searchInput" placeholder="Search...">
+  <input type="text" id="searchInput" placeholder="Search records...">
+
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span id="totalCount" style="font-weight:bold; color:#052;">Total: 0</span>
+
+    <select id="rowsPerPage">
+      <option value="10">0-10</option>
+      <option value="25">10-25</option>
+      <option value="50">10-50</option>
+      <option value="100">10-100</option>
+      <option value="all">All</option>
+    </select>
   </div>
-
-  <select id="rowsPerPage">
-    <option value="0-10">0-10</option>
-    <option value="10-25">10-25</option>
-    <option value="25-50">25-50</option>
-    <option value="50-100">50-100</option>
-    <option value="all">All</option>
-  </select>
 </div>
 
-<div class="table-box" id="tableContainer"></div>
+<div id="loader" class="spinner"></div>
+<div class="table-responsive" id="tableContainer"></div>
+<div class="pagination" id="pagination"></div>
 
+<!-- MODAL -->
+<div id="editModal">
+  <div class="modal-content">
+    <h3>Edit Record</h3>
+    <form id="editForm">
+      <input type="hidden" name="rowNumber" id="editRowNumber">
+      <input type="hidden" name="action" value="edit">
+      <input type="text" name="Name" id="editName" required>
+      <input type="text" name="NIN" id="editNIN" required>
+      <input type="text" name="Phone Number" id="editPhone" required>
+      <input type="email" name="Email" id="editEmail" required>
+
+      <div class="modal-actions">
+        <button type="button" onclick="closeModal()">Cancel</button>
+        <button type="submit" id="saveBtn">Save</button>
+      </div>
+    </form>
+  </div>
 </div>
-
-<!-- LIBRARIES -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbw7wt1Rok24XHEoRUJ1ruw9qnEBCtd_LldUFX-Zo-0toAFNoJWL27MgVTiFdg1MOk3t/exec";
 
 let allData = [];
 let filteredData = [];
-let rangeMode = "0-10";
+let currentPage = 1;
+let rowsPerPage = 10;
 
-/* SIDEBAR */
-function toggleSidebar() {
-  sidebar.classList.toggle("active");
-  overlay.classList.toggle("active");
-}
-function closeSidebar() {
-  sidebar.classList.remove("active");
-  overlay.classList.remove("active");
-}
+window.onload = fetchRecords;
 
 /* FETCH */
 function fetchRecords() {
+  loader.style.display = "block";
   fetch(scriptURL)
     .then(res => res.json())
     .then(data => {
       allData = data;
       filteredData = data;
       renderTable();
-    });
+    })
+    .finally(() => loader.style.display = "none");
 }
 
 /* SEARCH */
-searchInput.oninput = function () {
-  let v = this.value.toLowerCase();
-  filteredData = allData.filter(r =>
-    Object.values(r).join(" ").toLowerCase().includes(v)
+document.getElementById("searchInput").addEventListener("input", function() {
+  const value = this.value.toLowerCase();
+  filteredData = allData.filter(row =>
+    Object.values(row).join(" ").toLowerCase().includes(value)
   );
+  currentPage = 1;
   renderTable();
-};
+});
 
-/* RANGE */
-rowsPerPage.onchange = function () {
-  rangeMode = this.value;
+/* ROW SELECT */
+document.getElementById("rowsPerPage").addEventListener("change", function() {
+  rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
+  currentPage = 1;
   renderTable();
-};
+});
 
 /* TABLE */
 function renderTable() {
-  let start = 0, end = filteredData.length;
+  document.getElementById("totalCount").innerText = "Total: " + filteredData.length;
 
-  if (rangeMode !== "all") {
-    let p = rangeMode.split("-");
-    start = +p[0];
-    end = +p[1];
+  let data = filteredData;
+  let start = (currentPage - 1) * rowsPerPage;
+  let end = rowsPerPage === "all" ? data.length : start + rowsPerPage;
+  let paginated = rowsPerPage === "all" ? data : data.slice(start, end);
+
+  if (data.length === 0) {
+    tableContainer.innerHTML = "<p>No records found.</p>";
+    pagination.innerHTML = "";
+    return;
   }
-
-  let data = filteredData.slice(start, end);
-
-  if (!data.length) return tableContainer.innerHTML = "No records";
 
   let headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
 
-  let html = "<table><tr><th>SN</th>";
+  let html = `<table><thead><tr><th>SN</th>`;
   headers.forEach(h => html += `<th>${h}</th>`);
-  html += "</tr>";
+  html += `<th>Actions</th></tr></thead><tbody>`;
 
-  data.forEach((row,i) => {
-    html += `<tr><td>${start+i+1}</td>`;
-    headers.forEach(h => html += `<td>${row[h]||""}</td>`);
-    html += "</tr>";
+  paginated.forEach((row, i) => {
+    html += `<tr><td>${start + i + 1}</td>`;
+    headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
+    html += `<td>
+      <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row)})'>Edit</button>
+      <button class="btn-delete" onclick="deleteRow(${row.rowNumber})">Delete</button>
+    </td></tr>`;
   });
 
-  html += "</table>";
+  html += `</tbody></table>`;
   tableContainer.innerHTML = html;
+
+  renderPagination(data.length);
 }
 
-/* ✅ PDF DOWNLOAD (FULLY WORKING) */
-async function downloadPDF() {  
-  const { jsPDF } = window.jspdf;  
-  
-  let data = filteredData;  
-  if (data.length === 0) {  
-    alert("No data available to download.");  
-    return;  
-  }  
-  
-  // Remove first & last column  
-    
-let allHeaders = Object.keys(data[0]).filter(h => {  
-  let key = h.toLowerCase();  
-  
-  return (  
-    h !== "rowNumber" &&  
-    key !== "timestamp" &&  
-    key !== "email" &&  
-    key !== "otp"  
-  );  
-});  
-// still remove first & last column if needed  
-let headers = allHeaders.slice(1, -1);  
-  
-  const pdf = new jsPDF('l', 'mm', 'a4');  
-  
-  const pageWidth = 297;  
-  const pageHeight = 210;  
-  const margin = 10;  
-  const usableWidth = pageWidth - margin * 2;  
-  
-  let y = margin;  
-  
-  // Title  
-  pdf.setFontSize(14);  
-  pdf.text("AfriFUND Application Records", pageWidth / 2, y, { align: "center" });  
-  y += 8;  
-  
-  const searchValue = document.getElementById("searchInput").value;  
-  if (searchValue) {  
-    pdf.setFontSize(10);  
-    pdf.text("Filter: " + searchValue, margin, y);  
-    y += 6;  
-  }  
-  
-  pdf.setFontSize(9);  
+/* PAGINATION */
+function renderPagination(total) {
+  if (rowsPerPage === "all") {
+    pagination.innerHTML = "";
+    return;
+  }
 
-/* AUTO REFRESH */
-setInterval(fetchRecords, 5000);
+  let pages = Math.ceil(total / rowsPerPage);
+  let html = "";
 
-/* INIT */
-fetchRecords();
+  for (let i = 1; i <= pages; i++) {
+    html += `<button class="${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+
+  pagination.innerHTML = html;
+}
+
+function goPage(page) {
+  currentPage = page;
+  renderTable();
+}
+
+/* DELETE */
+function deleteRow(rowNum) {
+  if (confirm("Delete this record permanently?")) {
+    const fd = new FormData();
+    fd.append("action", "delete");
+    fd.append("rowNumber", rowNum);
+
+    fetch(scriptURL, { method: "POST", body: fd })
+      .then(() => fetchRecords());
+  }
+}
+
+/* EDIT */
+function openEditModal(row) {
+  editRowNumber.value = row.rowNumber;
+  editName.value = row["Name"] || "";
+  editNIN.value = row["NIN"] || "";
+  editPhone.value = row["Phone Number"] || "";
+  editEmail.value = row["Email"] || "";
+  editModal.style.display = "block";
+}
+
+function closeModal() {
+  editModal.style.display = "none";
+}
+
+editForm.onsubmit = function(e) {
+  e.preventDefault();
+  saveBtn.innerText = "Saving...";
+
+  fetch(scriptURL, { method: "POST", body: new FormData(this) })
+    .then(() => {
+      closeModal();
+      fetchRecords();
+    })
+    .finally(() => saveBtn.innerText = "Save");
+};
+
+/* SIDEBAR */
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.style.left = (sidebar.style.left === "0px") ? "-260px" : "0px";
+}
+
+/* AUTO REFRESH EVERY 5 SECONDS (ADDED) */
+setInterval(() => {
+  fetch(scriptURL)
+    .then(res => res.json())
+    .then(data => {
+      allData = data;
+
+      const value = document.getElementById("searchInput").value.toLowerCase();
+
+      filteredData = allData.filter(row =>
+        Object.values(row).join(" ").toLowerCase().includes(value)
+      );
+
+      renderTable();
+    })
+    .catch(() => {});
+}, 5000);
+
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </body>
 </html>
