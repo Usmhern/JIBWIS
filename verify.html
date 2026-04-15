@@ -267,7 +267,7 @@ editForm.onsubmit = function(e) {
     })
     .finally(() => saveBtn.innerText = "Save");
 };
-async function downloadPDF() {
+  async function downloadPDF() {
   const { jsPDF } = window.jspdf;
 
   let data = filteredData;
@@ -279,74 +279,86 @@ async function downloadPDF() {
 
   const headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
 
-  // Create clean temporary container
-  let tempDiv = document.createElement("div");
-  tempDiv.style.padding = "20px";
-  tempDiv.style.background = "#fff";
-
-  let html = `<h3 style="text-align:center;">AfriFUND Application Records</h3>`;
-
-  const searchValue = document.getElementById("searchInput").value;
-  if (searchValue) {
-    html += `<p><b>Filter:</b> ${searchValue}</p>`;
-  }
-
-  html += `<table border="1" style="border-collapse:collapse; width:100%; font-size:11px;">`;
-  
-  html += "<thead><tr><th>SN</th>";
-  headers.forEach(h => html += `<th>${h}</th>`);
-  html += "</tr></thead><tbody>";
-
-  data.forEach((row, i) => {
-    html += `<tr><td>${i + 1}</td>`;
-    headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
-    html += "</tr>";
-  });
-
-  html += "</tbody></table>";
-  tempDiv.innerHTML = html;
-
-  document.body.appendChild(tempDiv);
-
-  const canvas = await html2canvas(tempDiv, {
-    scale: 2,
-    useCORS: true
-  });
-
-  const imgData = canvas.toDataURL("image/png");
-
   const pdf = new jsPDF('p', 'mm', 'a4');
 
   const pageWidth = 210;
   const pageHeight = 297;
 
-  // ✅ ADD MARGINS (IMPORTANT FIX)
   const margin = 10;
   const usableWidth = pageWidth - margin * 2;
   const usableHeight = pageHeight - margin * 2;
 
-  const imgWidth = usableWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let y = margin;
 
-  let heightLeft = imgHeight;
-  let position = margin;
+  // Title
+  pdf.setFontSize(14);
+  pdf.text("AfriFUND Application Records", pageWidth / 2, y, { align: "center" });
+  y += 8;
 
-  // First page
-  pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-  heightLeft -= usableHeight;
-
-  // Additional pages
-  while (heightLeft > 0) {
-    pdf.addPage();
-    position = margin - (imgHeight - heightLeft);
-    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-    heightLeft -= usableHeight;
+  const searchValue = document.getElementById("searchInput").value;
+  if (searchValue) {
+    pdf.setFontSize(10);
+    pdf.text("Filter: " + searchValue, margin, y);
+    y += 6;
   }
 
-  pdf.save("AfriFUND_Records.pdf");
+  // Table settings
+  const colWidth = usableWidth / (headers.length + 1);
+  const rowHeight = 6;
 
-  document.body.removeChild(tempDiv);
-}
+  // Draw header
+  function drawHeader() {
+    pdf.setFontSize(9);
+    let x = margin;
+    pdf.setFont(undefined, "bold");
+
+    pdf.rect(x, y, colWidth, rowHeight);
+    pdf.text("SN", x + 1, y + 4);
+
+    x += colWidth;
+
+    headers.forEach(h => {
+      pdf.rect(x, y, colWidth, rowHeight);
+      pdf.text(String(h).substring(0, 12), x + 1, y + 4);
+      x += colWidth;
+    });
+
+    pdf.setFont(undefined, "normal");
+    y += rowHeight;
+  }
+
+  drawHeader();
+
+  // Draw rows safely
+  data.forEach((row, i) => {
+
+    // 🔥 CHECK PAGE BREAK BEFORE DRAWING ROW
+    if (y + rowHeight > pageHeight - margin) {
+      pdf.addPage();
+      y = margin;
+      drawHeader();
+    }
+
+    let x = margin;
+
+    pdf.rect(x, y, colWidth, rowHeight);
+    pdf.text(String(i + 1), x + 1, y + 4);
+    x += colWidth;
+
+    headers.forEach(h => {
+      pdf.rect(x, y, colWidth, rowHeight);
+
+      let text = String(row[h] || "").substring(0, 15);
+      pdf.text(text, x + 1, y + 4);
+
+      x += colWidth;
+    });
+
+    y += rowHeight;
+  });
+
+  pdf.save("AfriFUND_Records.pdf");
+  }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
