@@ -267,10 +267,9 @@ editForm.onsubmit = function(e) {
     })
     .finally(() => saveBtn.innerText = "Save");
 };
-  async function downloadPDF() {
+async function downloadPDF() {
   const { jsPDF } = window.jspdf;
 
-  // Use FILTERED data (this is the magic)
   let data = filteredData;
 
   if (data.length === 0) {
@@ -280,11 +279,19 @@ editForm.onsubmit = function(e) {
 
   const headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
 
-  // Create a temporary table (NOT affecting UI)
+  // Create clean temporary container
   let tempDiv = document.createElement("div");
+  tempDiv.style.padding = "20px";
+  tempDiv.style.background = "#fff";
 
   let html = `<h3 style="text-align:center;">AfriFUND Application Records</h3>`;
-  html += `<table border="1" style="border-collapse:collapse; width:100%; font-size:12px;">`;
+
+  const searchValue = document.getElementById("searchInput").value;
+  if (searchValue) {
+    html += `<p><b>Filter:</b> ${searchValue}</p>`;
+  }
+
+  html += `<table border="1" style="border-collapse:collapse; width:100%; font-size:11px;">`;
   
   html += "<thead><tr><th>SN</th>";
   headers.forEach(h => html += `<th>${h}</th>`);
@@ -301,7 +308,11 @@ editForm.onsubmit = function(e) {
 
   document.body.appendChild(tempDiv);
 
-  const canvas = await html2canvas(tempDiv, { scale: 2 });
+  const canvas = await html2canvas(tempDiv, {
+    scale: 2,
+    useCORS: true
+  });
+
   const imgData = canvas.toDataURL("image/png");
 
   const pdf = new jsPDF('p', 'mm', 'a4');
@@ -309,25 +320,31 @@ editForm.onsubmit = function(e) {
   const pageWidth = 210;
   const pageHeight = 297;
 
-  const imgWidth = pageWidth;
+  // ✅ ADD MARGINS (IMPORTANT FIX)
+  const margin = 10;
+  const usableWidth = pageWidth - margin * 2;
+  const usableHeight = pageHeight - margin * 2;
+
+  const imgWidth = usableWidth;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
   let heightLeft = imgHeight;
-  let position = 0;
+  let position = margin;
 
-  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
+  // First page
+  pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+  heightLeft -= usableHeight;
 
+  // Additional pages
   while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
     pdf.addPage();
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    position = margin - (imgHeight - heightLeft);
+    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+    heightLeft -= usableHeight;
   }
 
-  pdf.save("AfriFUND_Filtered_Records.pdf");
+  pdf.save("AfriFUND_Records.pdf");
 
-  // Clean up
   document.body.removeChild(tempDiv);
 }
 </script>
