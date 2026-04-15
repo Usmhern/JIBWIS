@@ -78,6 +78,16 @@ tr:hover { background-color: #f1f8f1; }
 <h2>AfriFUND Database</h2>
 
 <div class="controls">
+  <button onclick="downloadPDF()" style="
+  background:#052;
+  color:white;
+  border:none;
+  padding:8px 15px;
+  border-radius:5px;
+  cursor:pointer;
+">
+  Download PDF
+  </button>
   <input type="text" id="searchInput" placeholder="Search records...">
 
   <div style="display:flex; align-items:center; gap:10px;">
@@ -257,7 +267,71 @@ editForm.onsubmit = function(e) {
     })
     .finally(() => saveBtn.innerText = "Save");
 };
-</script>
+  async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
 
+  // Use FILTERED data (this is the magic)
+  let data = filteredData;
+
+  if (data.length === 0) {
+    alert("No data available to download.");
+    return;
+  }
+
+  const headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
+
+  // Create a temporary table (NOT affecting UI)
+  let tempDiv = document.createElement("div");
+
+  let html = `<h3 style="text-align:center;">AfriFUND Application Records</h3>`;
+  html += `<table border="1" style="border-collapse:collapse; width:100%; font-size:12px;">`;
+  
+  html += "<thead><tr><th>SN</th>";
+  headers.forEach(h => html += `<th>${h}</th>`);
+  html += "</tr></thead><tbody>";
+
+  data.forEach((row, i) => {
+    html += `<tr><td>${i + 1}</td>`;
+    headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
+    html += "</tr>";
+  });
+
+  html += "</tbody></table>";
+  tempDiv.innerHTML = html;
+
+  document.body.appendChild(tempDiv);
+
+  const canvas = await html2canvas(tempDiv, { scale: 2 });
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF('p', 'mm', 'a4');
+
+  const pageWidth = 210;
+  const pageHeight = 297;
+
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  pdf.save("AfriFUND_Filtered_Records.pdf");
+
+  // Clean up
+  document.body.removeChild(tempDiv);
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </body>
 </html>
