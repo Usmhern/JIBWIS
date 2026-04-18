@@ -7,20 +7,18 @@
 
 <style>
 body {
+  margin: 0;
   font-family: Arial;
   background: linear-gradient(135deg,#0a3d2f,#0c5c45);
-  margin: 0;
-  color: #333;
 }
 
 /* TOP BAR */
 .topbar {
-  display: flex;
-  align-items: center;
   background: #052;
   color: white;
   padding: 12px;
-  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .menu-btn {
@@ -37,7 +35,6 @@ body {
   border-radius: 8px;
   display: none;
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  overflow: hidden;
 }
 
 .menu a {
@@ -51,95 +48,72 @@ body {
   background: #f0f0f0;
 }
 
-/* MAIN CARD */
+/* CARD */
 .container {
   max-width: 500px;
   margin: 30px auto;
   background: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-h2 {
-  text-align: center;
-  color: #052;
 }
 
 /* STATUS */
 .status {
   text-align: center;
-  font-weight: bold;
-  margin: 15px 0;
   padding: 12px;
   border-radius: 8px;
-  font-size: 16px;
+  margin: 15px 0;
+  font-weight: bold;
 }
 
-/* BUTTONS */
+/* BUTTON */
 .btn {
   width: 100%;
   padding: 12px;
-  margin: 8px 0;
+  margin: 6px 0;
   border: none;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
   border-radius: 6px;
-  transition: 0.2s;
+  color: white;
+  cursor: pointer;
 }
 
-.btn:hover { opacity: 0.9; }
-
-.green { background: #0a8f3c; }
-.red { background: #d62828; }
+.green { background: green; }
+.red { background: red; }
 .blue { background: #052; }
 
-/* INPUT */
 input {
   width: 100%;
   padding: 10px;
-  margin: 8px 0;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-/* SMALL TEXT */
-.small {
-  font-size: 12px;
-  text-align: center;
-  color: gray;
-  margin-top: 10px;
+  margin: 6px 0;
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
   <div class="menu-btn" onclick="toggleMenu()">☰</div>
-  <div style="margin-left:10px;">JIBWIS CONTROL PANEL</div>
+  <div style="margin-left:10px;">JIBWIS CONTROL</div>
+</div>
 
-  <div id="menu" class="menu">
-    <a href="index.html">📖 APPLICATION FORM</a>
-    <a href="data.html">📚 ADMIN DATA</a>
-    <a href="admin.html">⚙️ SETTINGS</a>
-  </div>
+<div id="menu" class="menu">
+  <a href="index.html">📖 APPLICATION FORM</a>
+  <a href="data.html">📚 ADMIN DATA</a>
+  <a href="admin.html">⚙️ SETTINGS</a>
 </div>
 
 <div class="container">
 
-<h2>FORM SETTINGS</h2>
+<h2 style="text-align:center;">FORM SETTINGS</h2>
 
 <div id="statusBox" class="status">Loading...</div>
 
-<button class="btn green" onclick="setStatus('Active')">ACTIVATE FORM</button>
-<button class="btn red" onclick="setStatus('Inactive')">DEACTIVATE FORM</button>
+<button class="btn green" onclick="manualSet('Active')">ACTIVATE</button>
+<button class="btn red" onclick="manualSet('Inactive')">DEACTIVATE</button>
 
 <hr>
 
-<h3 style="text-align:center;">Schedule Form</h3>
+<h3 style="text-align:center;">Schedule</h3>
 
 <label>Open Time</label>
 <input type="time" id="openTime">
@@ -149,78 +123,103 @@ input {
 
 <button class="btn blue" onclick="saveSchedule()">SAVE SCHEDULE</button>
 
-<div class="small">Auto system checks every second</div>
-
 </div>
+
 <script>
 
 const scriptURL = "https://script.google.com/macros/s/AKfycbwT49hK5zL3fEAD_BtlOBPRcLOuPIBW9AnullI4RmGH8TsBFq1xvmrRVB_Hbndo0I7z/exec";
 
 let openTime = "";
 let closeTime = "";
-let lastState = ""; // prevent repeated trigger
+let lastState = "";
 
-/* LOAD SETTINGS */
-async function loadStatus() {
+/* MENU */
+function toggleMenu(){
+  let m = document.getElementById("menu");
+  m.style.display = (m.style.display === "block") ? "none" : "block";
+}
+
+/* LOAD DATA */
+async function loadData(){
   try {
-    const res = await fetch(scriptURL + "?settings=1");
-    const data = await res.json();
+    let res = await fetch(scriptURL + "?settings=1");
+    let data = await res.json();
 
     openTime = data.openTime || "";
     closeTime = data.closeTime || "";
+    lastState = data.status || "Inactive";
 
     document.getElementById("openTime").value = openTime;
     document.getElementById("closeTime").value = closeTime;
 
-    lastState = data.status || "Inactive";
     updateUI(lastState);
 
   } catch {
-    document.getElementById("statusBox").innerHTML = "⚠️ Error loading";
+    document.getElementById("statusBox").innerHTML = "Error loading";
   }
 }
 
-/* UPDATE UI */
+/* UI UPDATE */
 function updateUI(state){
-  const box = document.getElementById("statusBox");
+  let box = document.getElementById("statusBox");
 
-  if (state === "Active") {
-    box.innerHTML = "🟢 FORM IS ACTIVE";
+  if(state === "Active"){
+    box.innerHTML = "🟢 ACTIVE";
     box.style.background = "#d4f8d4";
     box.style.color = "green";
   } else {
-    box.innerHTML = "🔴 FORM IS INACTIVE";
+    box.innerHTML = "🔴 INACTIVE";
     box.style.background = "#ffd6d6";
     box.style.color = "red";
   }
 }
 
-/* SEND STATUS ONLY WHEN CHANGED */
-function updateServer(state){
+/* SEND STATUS */
+function sendStatus(state){
   let fd = new FormData();
-  fd.append("action", "setStatus");
-  fd.append("status", state);
+  fd.append("action","setStatus");
+  fd.append("status",state);
 
-  fetch(scriptURL, { method: "POST", body: fd })
-    .then(() => {
-      lastState = state;
-      updateUI(state);
-      console.log("Updated:", state);
-    });
+  fetch(scriptURL,{method:"POST",body:fd})
+  .then(()=>{
+    lastState = state;
+    updateUI(state);
+  });
 }
 
-/* 🔥 SMART SCHEDULE ENGINE */
-function checkSchedule(){
+/* MANUAL */
+function manualSet(state){
+  sendStatus(state);
+}
+
+/* SAVE SCHEDULE */
+function saveSchedule(){
+  let fd = new FormData();
+  fd.append("action","setSchedule");
+  fd.append("openTime",document.getElementById("openTime").value);
+  fd.append("closeTime",document.getElementById("closeTime").value);
+
+  fetch(scriptURL,{method:"POST",body:fd})
+  .then(res=>res.text())
+  .then(msg=>{
+    alert("Saved!");
+    loadData();
+  });
+}
+
+/* 🔥 AUTO ENGINE */
+function runSchedule(){
+
   if(!openTime || !closeTime) return;
 
-  const now = new Date();
-  const current = now.getHours()*60 + now.getMinutes();
+  let now = new Date();
+  let current = now.getHours()*60 + now.getMinutes();
 
-  const [oh, om] = openTime.split(":").map(Number);
-  const [ch, cm] = closeTime.split(":").map(Number);
+  let [oh,om] = openTime.split(":").map(Number);
+  let [ch,cm] = closeTime.split(":").map(Number);
 
-  const open = oh*60 + om;
-  const close = ch*60 + cm;
+  let open = oh*60 + om;
+  let close = ch*60 + cm;
 
   let newState;
 
@@ -230,35 +229,14 @@ function checkSchedule(){
     newState = "Inactive";
   }
 
-  // 🔥 ONLY TRIGGER IF CHANGED
   if(newState !== lastState){
-    updateServer(newState);
+    sendStatus(newState);
   }
 }
 
-/* SAVE SCHEDULE */
-function saveSchedule() {
-  let fd = new FormData();
-  fd.append("action", "setSchedule");
-  fd.append("openTime", document.getElementById("openTime").value);
-  fd.append("closeTime", document.getElementById("closeTime").value);
-
-  fetch(scriptURL, { method: "POST", body: fd })
-    .then(res => res.text())
-    .then(msg => {
-      alert("✅ Saved. Auto system started.");
-      loadStatus(); // reload values immediately
-    });
-}
-
-/* MANUAL CONTROL */
-function setStatus(state){
-  updateServer(state);
-}
-
-/* START ENGINE */
-loadStatus();
-setInterval(checkSchedule, 1000); // every second
+/* START */
+loadData();
+setInterval(runSchedule,1000);
 
 </script>
 
