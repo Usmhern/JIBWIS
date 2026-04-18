@@ -122,6 +122,22 @@ button:disabled{
   position:relative;
   z-index:1;
 }
+  .progress-container{
+  width:100%;
+  height:6px;
+  background:#ddd;
+  border-radius:10px;
+  margin-top:8px;
+  overflow:hidden;
+}
+
+#progressBar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#36d,#0af);
+  transition:width 1s linear;
+  }
+  
 </style>
 </head>
 
@@ -148,6 +164,12 @@ RECRUITMENT PORTAL
 <div class="blinking" id="statusBox" style="margin-top:8px;font-weight:bold;font-size:14px;">
 Checking system status...
 </div>
+  <div id="scheduleText" style="font-size:13px;margin-top:6px;"></div>
+
+<div class="progress-container">
+  <div id="progressBar"></div>
+</div>
+  
 <br><br>
 </center>
 
@@ -212,7 +234,7 @@ const form = document.getElementById("myForm");
 const submitBtn = document.getElementById("submitBtn");
 const statusBox = document.getElementById("statusBox");
 
-async function checkStatus(){
+/*async function checkStatus(){
   try{
     const res = await fetch(adminURL + "?settings=1&nocache=" + Date.now());
     const data = await res.json();
@@ -268,11 +290,66 @@ form.addEventListener("submit", async (e)=>{
     submitBtn.classList.remove("blinking");
     submitBtn.innerHTML = "SUBMIT";
   });
-});
+});*/
+async function checkStatus(){
+  try{
+    const res = await fetch(adminURL + "?settings=1&nocache=" + Date.now());
+    const data = await res.json();
 
+    const now = new Date();
+    const openTime = new Date(data.openTime);
+    const closeTime = new Date(data.closeTime);
+
+    const scheduleText = document.getElementById("scheduleText");
+    const progressBar = document.getElementById("progressBar");
+
+    if(data.status === "Active"){
+
+      statusBox.innerHTML = "🟢 APPLICATION IS OPEN";
+      statusBox.style.color = "green";
+      form.style.display = "block";
+
+      // Show closing time
+      scheduleText.innerHTML = `Closes at: <b>${closeTime.toLocaleString()}</b>`;
+
+      // Progress (open → close)
+      let total = closeTime - openTime;
+      let passed = now - openTime;
+
+      let percent = (passed / total) * 100;
+      progressBar.style.width = Math.min(percent,100) + "%";
+
+    }else{
+
+      statusBox.innerHTML = "🔴 APPLICATION IS CLOSED";
+      statusBox.style.color = "red";
+      form.style.display = "none";
+
+      // Show opening time
+      scheduleText.innerHTML = `Opens at: <b>${openTime.toLocaleString()}</b>`;
+
+      // Progress (now → open)
+      let total = openTime - now + 1; // avoid zero
+      let start = closeTime;
+
+      let percent = ((now - start) / (openTime - start)) * 100;
+
+      progressBar.style.width = Math.max(0, Math.min(percent,100)) + "%";
+    }
+
+    return data.status;
+
+  }catch(err){
+    statusBox.innerHTML = "⚠️ SYSTEM ERROR";
+    statusBox.style.color = "orange";
+    return "Error";
+  }
+  }
 // AUTO CHECK
 checkStatus();
-setInterval(checkStatus, 2000);
+setInterval(checkStatus, 5000);
+
+  
 </script>
 
 </body>
