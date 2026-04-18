@@ -6,85 +6,75 @@
 <title>JIBWIS Control</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: linear-gradient(135deg,#0a3d2f,#0c5c45);
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#0a3d2f,#0c5c45);
 }
 
-/* TOP BAR */
-.topbar {
-  background: #052;
-  color: white;
-  padding: 12px;
-  display: flex;
-  align-items: center;
+.topbar{
+  background:#052;
+  color:#fff;
+  padding:12px;
+  display:flex;
+  align-items:center;
 }
 
-.menu-btn {
-  font-size: 20px;
-  cursor: pointer;
+.menu-btn{
+  font-size:20px;
+  cursor:pointer;
 }
 
-/* MENU */
-.menu {
-  position: absolute;
-  top: 50px;
-  left: 10px;
-  background: white;
-  border-radius: 8px;
-  display: none;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+.menu{
+  position:absolute;
+  top:50px;
+  left:10px;
+  background:#fff;
+  display:none;
+  border-radius:8px;
 }
 
-.menu a {
-  display: block;
-  padding: 12px;
-  text-decoration: none;
-  color: #333;
+.menu a{
+  display:block;
+  padding:10px;
+  text-decoration:none;
+  color:#333;
 }
 
-.menu a:hover {
-  background: #f0f0f0;
+.container{
+  max-width:500px;
+  margin:30px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
 }
 
-/* CARD */
-.container {
-  max-width: 500px;
-  margin: 30px auto;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
+.status{
+  text-align:center;
+  padding:10px;
+  margin:10px 0;
+  border-radius:6px;
+  font-weight:bold;
 }
 
-/* STATUS */
-.status {
-  text-align: center;
-  padding: 12px;
-  border-radius: 8px;
-  margin: 15px 0;
-  font-weight: bold;
+.btn{
+  width:100%;
+  padding:12px;
+  margin:5px 0;
+  border:none;
+  color:#fff;
+  border-radius:6px;
+  cursor:pointer;
 }
 
-/* BUTTON */
-.btn {
-  width: 100%;
-  padding: 12px;
-  margin: 6px 0;
-  border: none;
-  border-radius: 6px;
-  color: white;
-  cursor: pointer;
-}
+.green{background:green;}
+.red{background:red;}
+.blue{background:#052;}
 
-.green { background: green; }
-.red { background: red; }
-.blue { background: #052; }
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0;
+input{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
 }
 </style>
 </head>
@@ -123,6 +113,11 @@ input {
 
 <button class="btn blue" onclick="saveSchedule()">SAVE SCHEDULE</button>
 
+<label style="display:flex;align-items:center;margin-top:10px;">
+  <input type="checkbox" id="autoToggle" onchange="toggleAuto(this)">
+  Enable Auto Schedule
+</label>
+
 </div>
 
 <script>
@@ -132,104 +127,106 @@ const scriptURL = "https://script.google.com/macros/s/AKfycbwT49hK5zL3fEAD_BtlOB
 let openTime = "";
 let closeTime = "";
 let lastState = "";
+let scheduleEnabled = false;
 
 /* MENU */
 function toggleMenu(){
   let m = document.getElementById("menu");
-  m.style.display = (m.style.display === "block") ? "none" : "block";
+  m.style.display = (m.style.display==="block")?"none":"block";
 }
 
-/* LOAD DATA */
+/* LOAD ONCE ONLY */
 async function loadData(){
-  try {
-    let res = await fetch(scriptURL + "?settings=1");
+  try{
+    let res = await fetch(scriptURL+"?settings=1");
     let data = await res.json();
 
     openTime = data.openTime || "";
     closeTime = data.closeTime || "";
     lastState = data.status || "Inactive";
+    scheduleEnabled = data.scheduleEnabled === "true";
 
+    // SET INPUT ONLY ONCE
     document.getElementById("openTime").value = openTime;
     document.getElementById("closeTime").value = closeTime;
+    document.getElementById("autoToggle").checked = scheduleEnabled;
 
     updateUI(lastState);
 
-  } catch {
-    document.getElementById("statusBox").innerHTML = "Error loading";
+  }catch{
+    document.getElementById("statusBox").innerHTML="Error loading";
   }
 }
 
-/* UI UPDATE */
+/* UI */
 function updateUI(state){
   let box = document.getElementById("statusBox");
 
-  if(state === "Active"){
-    box.innerHTML = "🟢 ACTIVE";
-    box.style.background = "#d4f8d4";
-    box.style.color = "green";
-  } else {
-    box.innerHTML = "🔴 INACTIVE";
-    box.style.background = "#ffd6d6";
-    box.style.color = "red";
+  if(state==="Active"){
+    box.innerHTML="🟢 ACTIVE";
+    box.style.background="#d4f8d4";
+    box.style.color="green";
+  }else{
+    box.innerHTML="🔴 INACTIVE";
+    box.style.background="#ffd6d6";
+    box.style.color="red";
   }
 }
 
 /* SEND STATUS */
 function sendStatus(state){
-  let fd = new FormData();
+  let fd=new FormData();
   fd.append("action","setStatus");
   fd.append("status",state);
 
   fetch(scriptURL,{method:"POST",body:fd})
   .then(()=>{
-    lastState = state;
+    lastState=state;
     updateUI(state);
   });
 }
 
 /* MANUAL */
 function manualSet(state){
+  scheduleEnabled=false;
+  document.getElementById("autoToggle").checked=false;
   sendStatus(state);
 }
 
 /* SAVE SCHEDULE */
 function saveSchedule(){
-  let fd = new FormData();
+  let fd=new FormData();
   fd.append("action","setSchedule");
   fd.append("openTime",document.getElementById("openTime").value);
   fd.append("closeTime",document.getElementById("closeTime").value);
 
   fetch(scriptURL,{method:"POST",body:fd})
-  .then(res=>res.text())
-  .then(msg=>{
-    alert("Saved!");
-    loadData();
-  });
+  .then(()=>alert("Saved successfully"));
 }
 
-/* 🔥 AUTO ENGINE */
+/* TOGGLE AUTO */
+function toggleAuto(el){
+  scheduleEnabled=el.checked;
+}
+
+/* AUTO ENGINE */
 function runSchedule(){
 
+  if(!scheduleEnabled) return;
   if(!openTime || !closeTime) return;
 
-  let now = new Date();
-  let current = now.getHours()*60 + now.getMinutes();
+  let now=new Date();
+  let current=now.getHours()*60+now.getMinutes();
 
-  let [oh,om] = openTime.split(":").map(Number);
-  let [ch,cm] = closeTime.split(":").map(Number);
+  let [oh,om]=openTime.split(":").map(Number);
+  let [ch,cm]=closeTime.split(":").map(Number);
 
-  let open = oh*60 + om;
-  let close = ch*60 + cm;
+  let open=oh*60+om;
+  let close=ch*60+cm;
 
-  let newState;
+  let newState=(current>=open && current<close)?"Active":"Inactive";
 
-  if(current >= open && current < close){
-    newState = "Active";
-  } else {
-    newState = "Inactive";
-  }
-
-  if(newState !== lastState){
+  if(newState!==lastState){
     sendStatus(newState);
   }
 }
