@@ -66,15 +66,15 @@ tr:hover { background-color: #f1f8f1; }
 
 <div class="controls">
   <button onclick="downloadPDF()" style="background:navy; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">
-    Export PDF (Portrait)
+    Export PDF (Current View)
   </button>
 
   <input type="text" id="searchInput" placeholder="Search records...">
 
   <div style="display:flex; align-items:center; gap:10px;">
     <select id="sortOrder">
-      <option value="newest">Sort: Newest First</option>
-      <option value="az">Sort: Name (A-Z)</option>
+      <option value="normal">Sort: Normal</option>
+      <option value="az">Sort: A - Z</option>
     </select>
     
     <span id="totalCount" style="font-weight:bold; color:#052; background: #e8f5e9; padding: 5px 12px; border-radius: 20px;">Total: 0</span>
@@ -137,29 +137,31 @@ function applySearchAndRender() {
   const value = document.getElementById("searchInput").value.toLowerCase();
   const sort = document.getElementById("sortOrder").value;
 
-  // 1. Filter
+  // 1. Filter based on search input
   let results = allData.filter(row =>
     Object.values(row).join(" ").toLowerCase().includes(value)
   );
 
-  // 2. Sort
+  // 2. Apply Sorting
   if (sort === "az") {
     results.sort((a, b) => {
-      // Assumes your first column is Name. Adjust "FullName" to your actual sheet header if needed.
-      const nameA = (a.FullName || a.Name || "").toString().toLowerCase();
-      const nameB = (b.FullName || b.Name || "").toString().toLowerCase();
-      return nameA.localeCompare(nameB);
+      const key = Object.keys(a).find(k => k.toLowerCase().includes('name')) || Object.keys(a)[0];
+      const valA = (a[key] || "").toString().trim().toLowerCase();
+      const valB = (b[key] || "").toString().trim().toLowerCase();
+      return valA.localeCompare(valB);
     });
   } else {
-    // Default: Newest first (assuming RowNumber reflects insertion order)
-    results.sort((a, b) => b.rowNumber - a.rowNumber);
+    results.sort((a, b) => a.rowNumber - b.rowNumber);
   }
 
-  filteredData = results;
+  filteredData = results; // Update global variable used by table AND PDF
   renderTable();
 }
 
-document.getElementById("searchInput").addEventListener("input", applySearchAndRender);
+document.getElementById("searchInput").addEventListener("input", () => {
+  currentPage = 1; // Reset to page 1 on search
+  applySearchAndRender();
+});
 document.getElementById("sortOrder").addEventListener("change", applySearchAndRender);
 document.getElementById("rowsPerPage").addEventListener("change", function() {
   rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
@@ -228,7 +230,7 @@ function showNotification(msg) {
 }
 
 function deleteRow(n) {
-  if(!confirm("Are you sure you want to delete this record?")) return;
+  if(!confirm("Are you sure?")) return;
   let fd = new FormData(); fd.append("action", "delete"); fd.append("rowNumber", n);
   showNotification("Deleting record...");
   fetch(scriptURL, { method: "POST", body: fd }).then(() => fetchRecords());
@@ -272,7 +274,7 @@ setInterval(() => {
     .then(r => r.json())
     .then(data => {
       if (previousLength !== 0 && data.length > previousLength) {
-        showNotification("🔔 " + (data.length - previousLength) + " New Applicant(s) Added");
+        showNotification("🔔 " + (data.length - previousLength) + " New Record(s) Added");
       }
       if (data.length !== previousLength || JSON.stringify(data) !== JSON.stringify(allData)) {
         allData = data;
@@ -283,11 +285,12 @@ setInterval(() => {
     .catch(e => console.log("Refresh failed silently"));
 }, 2000);
 
-/* PDF GENERATION - ONLY HEADING COLORED */
+/* PDF GENERATION - RESPECTS CURRENT SEARCH/FILTER */
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('p', 'mm', 'a4');
 
+  // filteredData contains exactly what is on the screen (searched or full)
   if (filteredData.length === 0) return alert("No data to export");
 
   const excluded = ["rownumber", "timestamp", "otp"];
@@ -302,7 +305,9 @@ function downloadPDF() {
 
   doc.setFontSize(14);
   doc.setTextColor(0, 85, 34); 
-  doc.text("FAG OF JIBWIS NGURU RECRUITMENT LIST", 105, 15, { align: "center" });
+  const isSearch = document.getElementById("searchInput").value !== "";
+  const title = isSearch ? "SEARCH RESULTS - RECRUITMENT LIST" : "FULL RECRUITMENT LIST";
+  doc.text(title, 105, 15, { align: "center" });
   
   doc.autoTable({
     head: [['SN', ...headers]],
@@ -312,24 +317,24 @@ function downloadPDF() {
     styles: { 
       fontSize: 7, 
       cellPadding: 2, 
-      textColor: [0, 0, 0], // Body text color: Black
-      fillColor: [255, 255, 255] // Body background: White
+      textColor: [0, 0, 0],
+      fillColor: [255, 255, 255]
     },
     headStyles: { 
-      fillColor: [0, 85, 34], // Heading background: JIBWIS Green
-      textColor: [255, 255, 255], // Heading text: White
+      fillColor: [0, 85, 34], 
+      textColor: [255, 255, 255],
       halign: 'center' 
     },
     alternateRowStyles: { 
-      fillColor: [255, 255, 255] // Disable alternate row coloring
+      fillColor: [255, 255, 255] 
     },
     columnStyles: { 0: { cellWidth: 8 } }
   });
 
-  doc.save("JIBWIS_Recruitment.pdf");
+  const fileName = isSearch ? "Search_Results.pdf" : "Full_List.pdf";
+  doc.save(fileName);
 }
 </script>
 
 </body>
-  </html>
-  
+</html>
