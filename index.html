@@ -5,23 +5,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" href="20251223_194733.png" type="image/png">
   <title>JIBWIS</title>
-  <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    #timer { font-size: 10px; text-align:center; font-weight: bold; margin-bottom: 15px; color: red; border:1px solid black; border-radius:20px; box-shadow:inset 0px 0px 3px black; width:100%; font-family:monospace; padding: 2px; }
-    body { background: linear-gradient(to top, black,#fff); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
-    .container2 { background: transparent; padding: 2rem; width: 350px; }
-    .input-group, .input-groupE { margin-bottom: 1rem; }
-    .input-group label, .input-groupE label { display: block; font-weight:bold; color:black; margin-bottom: 5px; font-size: 14px; }
-    .input-group input, .input-group select, .input-groupE input { width: 100%; padding: 0.5rem; border-radius: 5px; border: none; background: transparent; border-bottom: 1px solid #bbb; font-size: 14px; outline: none; }
-    .input-groupE input { text-transform: lowercase; }
-    .input-group input { text-transform: capitalize; }
-    .register-btn { width: 100%; padding: 0.7rem; border: 1px solid #fff; margin-top: 0.5rem; border-radius: 15px; background: #052; color: white; font-weight: bold; cursor: pointer; }
-    .fetch-btn { width: 100%; padding: 0.7rem; border: 1px solid #052; margin-top: 1rem; border-radius: 15px; background: white; color: #052; font-weight: bold; cursor: pointer; }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-    .blinking { animation: blink 1s infinite; }
+<style>
+:root{
+  --bg: linear-gradient(to top, black,#fff);
+  --text: black;
+  --card: transparent;
+  --input-border: #bbb;
+  --btn-bg: #052;
+  --btn-text: white;
+}
 
-    .loader {
+/* DARK MODE VARIABLES */
+body.dark{
+  --bg: linear-gradient(to top, #000, #111);
+  --text: white;
+  --card: #111;
+  --input-border: #444;
+  --btn-bg: #0a7;
+  --btn-text: white;
+}
+
+* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 20px;
+  transition: 0.4s;
+}
+
+.container2 {
+  background: var(--card);
+  padding: 2rem;
+  width: 350px;
+  border-radius: 15px;
+  transition: 0.4s;
+}
+
+.input-group, .input-groupE { margin-bottom: 1rem; }
+
+.input-group label {
+  display: block;
+  font-weight:bold;
+  color: var(--text);
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  border-bottom: 1px solid var(--input-border);
+  font-size: 14px;
+  outline: none;
+  color: var(--text);
+}
+
+.register-btn {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 15px;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* LOADER */
+.loader {
   width: 18px;
   height: 18px;
   border: 3px solid #fff;
@@ -35,18 +96,18 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-                    }
-.blinking {
-  animation: blink 1s infinite;
 }
 
 @keyframes blink {
   0% { opacity: 1; }
   50% { opacity: 0.3; }
   100% { opacity: 1; }
-      }
-                    
-  </style>
+}
+
+.blinking {
+  animation: blink 1s infinite;
+}
+</style>
 </head>
 <body>
   <div class="container2">
@@ -58,7 +119,19 @@
       NGURU, YOBE STATE
     </span>
   </b>
-
+<button id="themeToggle" style="
+  width:100%;
+  margin-bottom:10px;
+  padding:8px;
+  border-radius:20px;
+  border:none;
+  background:#222;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+">
+  🌙 Dark Mode
+</button>
   <!-- 🔥 STATUS DISPLAY -->
   <div id="statusBox"
     style="margin-top:8px; font-weight:bold; font-size:14px;">
@@ -107,8 +180,7 @@
 
       <button class="register-btn" id="submitBtn" type="submit">SUBMIT</button>
     </form>
-    
-<script>
+    <script>
 const ageSelect = document.getElementById('age-dropdown');
 
 // Loop from 8 to 40
@@ -120,6 +192,26 @@ for (let i = 8; i <= 40; i++) {
   }
       
   
+const toggleBtn = document.getElementById("themeToggle");
+
+// Load saved theme
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark");
+  toggleBtn.innerHTML = "☀️ Light Mode";
+}
+
+// Toggle theme
+toggleBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+
+  if (document.body.classList.contains("dark")) {
+    localStorage.setItem("theme", "dark");
+    toggleBtn.innerHTML = "☀️ Light Mode";
+  } else {
+    localStorage.setItem("theme", "light");
+    toggleBtn.innerHTML = "🌙 Dark Mode";
+  }
+});
 
   
 const scriptURL = "https://script.google.com/macros/s/AKfycbwWkfBWnZw7nC1I7QqrlRJEO-sD7AGUaPbh9pnTj_MjvNSK06zkSgH_f5DX-zyhqXkt/exec"; 
