@@ -222,17 +222,55 @@ let previousLength = 0;
 window.onload = fetchRecords;
 
 /* FETCH */
+/* FETCH RECORDS */
 function fetchRecords() {
+  const loader = document.getElementById("loader");
   loader.style.display = "block";
+
   fetch(scriptURL)
     .then(res => res.json())
     .then(data => {
-      allData = data;
-      filteredData = data;
-      renderTable();
+      if (data && data.length > 0) {
+        allData = data;
+        filteredData = data;
+        previousLength = data.length; // Set initial length
+        renderTable();
+      } else {
+        document.getElementById("tableContainer").innerHTML = "<p>No records found in the sheet.</p>";
+      }
+    })
+    .catch(err => {
+      console.error("Fetch error:", err);
+      document.getElementById("tableContainer").innerHTML = "<p style='color:red;'>Error loading data. Check console.</p>";
     })
     .finally(() => loader.style.display = "none");
 }
+
+/* SMART AUTO-REFRESH (Every 30 Seconds) */
+setInterval(() => {
+  fetch(scriptURL)
+    .then(r => r.json())
+    .then(data => {
+      // ONLY re-render if the number of rows changed
+      if (data.length !== previousLength) {
+        if (data.length > previousLength) {
+          showNotification("🔔 " + (data.length - previousLength) + " New Record(s) Added");
+        }
+        
+        allData = data;
+        previousLength = data.length;
+
+        // Maintain the current search filter during refresh
+        const searchValue = document.getElementById("searchInput").value.toLowerCase();
+        filteredData = allData.filter(row =>
+          Object.values(row).join(" ").toLowerCase().includes(searchValue)
+        );
+
+        renderTable();
+      }
+    })
+    .catch(e => console.log("Silent refresh failed: ", e));
+}, 30000); 
 
 /* SEARCH */
 document.getElementById("searchInput").addEventListener("input", function () {
