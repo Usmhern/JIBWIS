@@ -107,13 +107,46 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .blinking {
   animation: blink 1s infinite;
 }
+  .container2 {
+  position: relative; /* important */
+  background: var(--card);
+  padding: 2rem;
+  width: 350px;
+  border-radius: 15px;
+  transition: 0.4s;
+  overflow: hidden;
+}
+
+/* 🔥 BACKGROUND WATERMARK IMAGE */
+.container2::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 250px;
+  height: 250px;
+  background: url('jibwis.png') no-repeat center;
+  background-size: contain;
+  
+  transform: translate(-50%, -50%);
+  
+  opacity: 0.08; /* adjust transparency here */
+  
+  pointer-events: none; /* allows clicking through */
+  z-index: 0;
+}
+
+/* Make sure content stays above */
+.container2 * {
+  position: relative;
+  z-index: 1;
+  }
 </style>
 </head>
 <body>
   <div class="container2">
     <center><img src="20251223_194733.png" alt="JIBWIS" width="200" style="border-radius:100%;"></center>
-    <center><img src="jibwis.png" alt="JIBWIS" width="200"></center>
-    <center><b><span style="color:blue;font-size:35px; font-family:impact;">FAG OF </span><span style="color:blue; font-size:35px;">JIBWIS</span></b></center>
+        <center><b><span style="color:blue;font-size:35px; font-family:impact;">FAG OF </span><span style="color:blue; font-size:35px;">JIBWIS</span></b></center>
     <center>
   <b>
     <label style="color:black; font-size:15px; font-family:monospace;">
