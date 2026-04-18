@@ -170,7 +170,6 @@ function renderTable() {
   let start = (rowsPerPage === "all") ? 0 : (currentPage - 1) * rowsPerPage;
   let paginated = (rowsPerPage === "all") ? filteredData : filteredData.slice(start, start + rowsPerPage);
 
-  // Filter out the columns you don't want to see in the table
   let headers = Object.keys(allData[0]).filter(h => 
     h !== "rowNumber" && h.toLowerCase() !== "otp" && h.toLowerCase() !== "timestamp"
   );
@@ -276,7 +275,6 @@ function showNotification(msg) {
   }, 3500);
 }
 
-// Background Sync (Every 30 seconds)
 setInterval(() => {
   if (isEditing) return;
   fetch(scriptURL)
@@ -293,7 +291,7 @@ setInterval(() => {
     });
 }, 30000);
 
-/* REPAIRED PDF GENERATION - PORTRAIT & FILTERED */
+/* PDF GENERATION - PORTRAIT & TIMESTAMP REMOVED */
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('p', 'mm', 'a4');
@@ -303,7 +301,7 @@ function downloadPDF() {
     return;
   }
 
-  // Define strictly excluded technical columns
+  // Define strictly excluded technical columns - Ensure timestamp is included here
   const excluded = ["rownumber", "timestamp", "otp"];
 
   // Filter headers for the PDF
@@ -312,7 +310,7 @@ function downloadPDF() {
   );
 
   const tableData = filteredData.map((row, index) => [
-    index + 1,
+    index + 1, // This is your SN column
     ...headers.map(h => row[h] || "")
   ]);
 
@@ -352,4 +350,5 @@ function downloadPDF() {
 </script>
 
 </body>
-</html>
+  </html>
+  
