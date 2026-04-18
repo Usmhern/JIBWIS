@@ -3,23 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JIBWIS</title>
+<title>JIBWIS Control</title>
 
 <style>
 body {
   font-family: Arial;
-  background: #f4f6f8;
+  background: linear-gradient(135deg,#0a3d2f,#0c5c45);
   margin: 0;
-  padding: 20px;
+  color: #333;
 }
 
+/* TOP BAR */
+.topbar {
+  display: flex;
+  align-items: center;
+  background: #052;
+  color: white;
+  padding: 12px;
+  position: relative;
+}
+
+.menu-btn {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* MENU */
+.menu {
+  position: absolute;
+  top: 50px;
+  left: 10px;
+  background: white;
+  border-radius: 8px;
+  display: none;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.menu a {
+  display: block;
+  padding: 12px;
+  text-decoration: none;
+  color: #333;
+}
+
+.menu a:hover {
+  background: #f0f0f0;
+}
+
+/* MAIN CARD */
 .container {
   max-width: 500px;
-  margin: auto;
+  margin: 30px auto;
   background: white;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
 h2 {
@@ -27,14 +66,17 @@ h2 {
   color: #052;
 }
 
+/* STATUS */
 .status {
   text-align: center;
   font-weight: bold;
   margin: 15px 0;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
+  font-size: 16px;
 }
 
+/* BUTTONS */
 .btn {
   width: 100%;
   padding: 12px;
@@ -44,12 +86,16 @@ h2 {
   font-size: 14px;
   cursor: pointer;
   border-radius: 6px;
+  transition: 0.2s;
 }
 
-.green { background: green; }
-.red { background: red; }
+.btn:hover { opacity: 0.9; }
+
+.green { background: #0a8f3c; }
+.red { background: #d62828; }
 .blue { background: #052; }
 
+/* INPUT */
 input {
   width: 100%;
   padding: 10px;
@@ -58,6 +104,7 @@ input {
   border: 1px solid #ccc;
 }
 
+/* SMALL TEXT */
 .small {
   font-size: 12px;
   text-align: center;
@@ -69,11 +116,23 @@ input {
 
 <body>
 
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="menu-btn" onclick="toggleMenu()">☰</div>
+  <div style="margin-left:10px;">JIBWIS CONTROL PANEL</div>
+
+  <div id="menu" class="menu">
+    <a href="index.html">📖 APPLICATION FORM</a>
+    <a href="data.html">📚 ADMIN DATA</a>
+    <a href="admin.html">⚙️ SETTINGS</a>
+  </div>
+</div>
+
 <div class="container">
 
 <h2>FORM SETTINGS</h2>
 
-<div id="statusBox" class="status">Loading status...</div>
+<div id="statusBox" class="status">Loading...</div>
 
 <button class="btn green" onclick="setStatus('Active')">ACTIVATE FORM</button>
 <button class="btn red" onclick="setStatus('Inactive')">DEACTIVATE FORM</button>
@@ -90,7 +149,7 @@ input {
 
 <button class="btn blue" onclick="saveSchedule()">SAVE SCHEDULE</button>
 
-<div class="small">JIBWIS Nguru Control System</div>
+<div class="small">Auto system checks every second</div>
 
 </div>
 
@@ -98,33 +157,50 @@ input {
 
 const scriptURL = "https://script.google.com/macros/s/AKfycbwT49hK5zL3fEAD_BtlOBPRcLOuPIBW9AnullI4RmGH8TsBFq1xvmrRVB_Hbndo0I7z/exec";
 
+let openTime = "";
+let closeTime = "";
 
-// 🔥 LOAD STATUS LIVE
+/* MENU */
+function toggleMenu(){
+  let m = document.getElementById("menu");
+  m.style.display = (m.style.display === "block") ? "none" : "block";
+}
+
+/* LOAD STATUS + SCHEDULE */
 async function loadStatus() {
   try {
     const res = await fetch(scriptURL + "?settings=1");
     const data = await res.json();
 
-    const box = document.getElementById("statusBox");
+    openTime = data.openTime || "";
+    closeTime = data.closeTime || "";
 
-    if (data.status === "Active") {
-      box.innerHTML = "🟢 FORM IS ACTIVE";
-      box.style.background = "#d4f8d4";
-      box.style.color = "green";
-    } else {
-      box.innerHTML = "🔴 FORM IS INACTIVE";
-      box.style.background = "#ffd6d6";
-      box.style.color = "red";
-    }
+    document.getElementById("openTime").value = openTime;
+    document.getElementById("closeTime").value = closeTime;
 
-  } catch (err) {
-    document.getElementById("statusBox").innerHTML =
-      "⚠️ Unable to load status";
+    updateStatus(data.status);
+
+  } catch {
+    document.getElementById("statusBox").innerHTML = "⚠️ Error loading";
   }
 }
 
+/* UPDATE STATUS UI */
+function updateStatus(status){
+  const box = document.getElementById("statusBox");
 
-// 🔥 ACTIVATE / DEACTIVATE FORM
+  if (status === "Active") {
+    box.innerHTML = "🟢 FORM IS ACTIVE";
+    box.style.background = "#d4f8d4";
+    box.style.color = "green";
+  } else {
+    box.innerHTML = "🔴 FORM IS INACTIVE";
+    box.style.background = "#ffd6d6";
+    box.style.color = "red";
+  }
+}
+
+/* MANUAL CONTROL */
 function setStatus(status) {
   let fd = new FormData();
   fd.append("action", "setStatus");
@@ -135,12 +211,10 @@ function setStatus(status) {
     .then(msg => {
       alert(msg);
       loadStatus();
-    })
-    .catch(() => alert("Error updating status"));
+    });
 }
 
-
-// 🔥 SAVE SCHEDULE
+/* SAVE SCHEDULE */
 function saveSchedule() {
   let fd = new FormData();
   fd.append("action", "setSchedule");
@@ -149,16 +223,33 @@ function saveSchedule() {
 
   fetch(scriptURL, { method: "POST", body: fd })
     .then(res => res.text())
-    .then(msg => alert(msg))
-    .catch(() => alert("Error saving schedule"));
+    .then(msg => alert(msg));
 }
 
+/* 🔥 AUTO SCHEDULE LOGIC */
+function checkSchedule(){
+  if(!openTime || !closeTime) return;
 
-// 🔄 AUTO REFRESH STATUS EVERY 5 SECONDS
-setInterval(loadStatus, 5000);
+  const now = new Date();
+  const current = now.getHours()*60 + now.getMinutes();
 
-// RUN ON LOAD
+  const [oh, om] = openTime.split(":").map(Number);
+  const [ch, cm] = closeTime.split(":").map(Number);
+
+  const open = oh*60 + om;
+  const close = ch*60 + cm;
+
+  if(current >= open && current < close){
+    setStatus("Active");
+  } else {
+    setStatus("Inactive");
+  }
+}
+
+/* RUN */
 loadStatus();
+setInterval(loadStatus, 5000);
+setInterval(checkSchedule, 10000); // every 10 sec
 
 </script>
 
