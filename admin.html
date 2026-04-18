@@ -3,78 +3,108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JIBWIS Control</title>
+<title>JIBWIS Control Panel</title>
 
 <style>
 body{
   margin:0;
-  font-family:Arial;
-  background:linear-gradient(135deg,#0a3d2f,#0c5c45);
+  font-family: 'Segoe UI', Tahoma;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#fff;
 }
 
+/* TOPBAR */
 .topbar{
-  background:#052;
-  color:#fff;
-  padding:12px;
   display:flex;
   align-items:center;
+  padding:15px 20px;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
 }
 
 .menu-btn{
-  font-size:20px;
+  font-size:22px;
   cursor:pointer;
 }
 
 .menu{
   position:absolute;
-  top:50px;
-  left:10px;
+  top:60px;
+  left:20px;
   background:#fff;
+  color:#000;
+  border-radius:10px;
   display:none;
-  border-radius:8px;
+  overflow:hidden;
 }
 
 .menu a{
   display:block;
-  padding:10px;
+  padding:12px 20px;
   text-decoration:none;
   color:#333;
 }
 
-.container{
-  max-width:500px;
-  margin:30px auto;
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
+.menu a:hover{
+  background:#eee;
 }
 
+/* CARD */
+.container{
+  max-width:500px;
+  margin:40px auto;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* STATUS */
 .status{
   text-align:center;
-  padding:10px;
-  margin:10px 0;
-  border-radius:6px;
+  padding:15px;
+  border-radius:10px;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+/* BUTTONS */
+.btn{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
   font-weight:bold;
 }
 
-.btn{
-  width:100%;
-  padding:12px;
-  margin:5px 0;
-  border:none;
-  color:#fff;
-  border-radius:6px;
-  cursor:pointer;
-}
+.green{background:#27ae60;color:#fff;}
+.red{background:#e74c3c;color:#fff;}
+.blue{background:#3498db;color:#fff;}
 
-.green{background:green;}
-.red{background:red;}
-.blue{background:#052;}
-
+/* INPUT */
 input{
   width:100%;
-  padding:10px;
-  margin:5px 0;
+  padding:12px;
+  margin-top:8px;
+  border-radius:8px;
+  border:none;
+}
+
+/* LABEL */
+label{
+  margin-top:15px;
+  display:block;
+  font-size:14px;
+}
+
+/* INFO */
+.info{
+  font-size:13px;
+  margin-top:10px;
+  opacity:0.8;
 }
 </style>
 </head>
@@ -83,40 +113,42 @@ input{
 
 <div class="topbar">
   <div class="menu-btn" onclick="toggleMenu()">☰</div>
-  <div style="margin-left:10px;">JIBWIS CONTROL</div>
+  <div style="margin-left:10px;font-weight:bold;">JIBWIS CONTROL PANEL</div>
 </div>
 
 <div id="menu" class="menu">
-  <a href="index.html">📖 APPLICATION FORM</a>
-  <a href="data.html">📚 ADMIN DATA</a>
-  <a href="admin.html">⚙️ SETTINGS</a>
+  <a href="index.html">📖 Application Form</a>
+  <a href="data.html">📚 Admin Data</a>
+  <a href="admin.html">⚙ Settings</a>
 </div>
 
 <div class="container">
 
-<h2 style="text-align:center;">FORM SETTINGS</h2>
+<h2 style="text-align:center;">Form Control</h2>
 
 <div id="statusBox" class="status">Loading...</div>
 
-<button class="btn green" onclick="manualSet('Active')">ACTIVATE</button>
-<button class="btn red" onclick="manualSet('Inactive')">DEACTIVATE</button>
+<button class="btn green" onclick="manualSet('Active')">Activate</button>
+<button class="btn red" onclick="manualSet('Inactive')">Deactivate</button>
 
 <hr>
 
-<h3 style="text-align:center;">Schedule</h3>
+<h3>Schedule Setup</h3>
 
-<label>Open Time</label>
-<input type="time" id="openTime">
+<label>Open Date & Time</label>
+<input type="datetime-local" id="openTime">
 
-<label>Close Time</label>
-<input type="time" id="closeTime">
+<label>Close Date & Time</label>
+<input type="datetime-local" id="closeTime">
 
-<button class="btn blue" onclick="saveSchedule()">SAVE SCHEDULE</button>
+<button class="btn blue" onclick="saveSchedule()">Save Schedule</button>
 
-<label style="display:flex;align-items:center;margin-top:10px;">
+<label style="margin-top:15px;">
   <input type="checkbox" id="autoToggle" onchange="toggleAuto(this)">
-  Enable Auto Schedule
+  Enable Automatic Scheduling
 </label>
+
+<div class="info" id="scheduleInfo"></div>
 
 </div>
 
@@ -131,11 +163,11 @@ let scheduleEnabled = false;
 
 /* MENU */
 function toggleMenu(){
-  let m = document.getElementById("menu");
+  let m=document.getElementById("menu");
   m.style.display = (m.style.display==="block")?"none":"block";
 }
 
-/* LOAD ONCE ONLY */
+/* LOAD DATA */
 async function loadData(){
   try{
     let res = await fetch(scriptURL+"?settings=1");
@@ -146,12 +178,12 @@ async function loadData(){
     lastState = data.status || "Inactive";
     scheduleEnabled = data.scheduleEnabled === "true";
 
-    // SET INPUT ONLY ONCE
     document.getElementById("openTime").value = openTime;
     document.getElementById("closeTime").value = closeTime;
     document.getElementById("autoToggle").checked = scheduleEnabled;
 
     updateUI(lastState);
+    showSchedule();
 
   }catch{
     document.getElementById("statusBox").innerHTML="Error loading";
@@ -160,16 +192,28 @@ async function loadData(){
 
 /* UI */
 function updateUI(state){
-  let box = document.getElementById("statusBox");
+  let box=document.getElementById("statusBox");
 
   if(state==="Active"){
-    box.innerHTML="🟢 ACTIVE";
+    box.innerHTML="🟢 FORM ACTIVE";
     box.style.background="#d4f8d4";
     box.style.color="green";
   }else{
-    box.innerHTML="🔴 INACTIVE";
+    box.innerHTML="🔴 FORM CLOSED";
     box.style.background="#ffd6d6";
     box.style.color="red";
+  }
+}
+
+/* SHOW SCHEDULE */
+function showSchedule(){
+  let info=document.getElementById("scheduleInfo");
+
+  if(openTime && closeTime){
+    info.innerHTML = `
+      Opens: <b>${new Date(openTime).toLocaleString()}</b><br>
+      Closes: <b>${new Date(closeTime).toLocaleString()}</b>
+    `;
   }
 }
 
@@ -190,50 +234,71 @@ function sendStatus(state){
 function manualSet(state){
   scheduleEnabled=false;
   document.getElementById("autoToggle").checked=false;
+
+  let fd=new FormData();
+  fd.append("action","toggleAuto");
+  fd.append("enabled","false");
+
+  fetch(scriptURL,{method:"POST",body:fd});
+
   sendStatus(state);
 }
 
 /* SAVE SCHEDULE */
 function saveSchedule(){
+
+  openTime=document.getElementById("openTime").value;
+  closeTime=document.getElementById("closeTime").value;
+
   let fd=new FormData();
   fd.append("action","setSchedule");
-  fd.append("openTime",document.getElementById("openTime").value);
-  fd.append("closeTime",document.getElementById("closeTime").value);
+  fd.append("openTime",openTime);
+  fd.append("closeTime",closeTime);
 
   fetch(scriptURL,{method:"POST",body:fd})
-  .then(()=>alert("Saved successfully"));
+  .then(()=>{
+    alert("Schedule saved!");
+    showSchedule();
+  });
 }
 
 /* TOGGLE AUTO */
 function toggleAuto(el){
   scheduleEnabled=el.checked;
+
+  let fd=new FormData();
+  fd.append("action","toggleAuto");
+  fd.append("enabled",scheduleEnabled);
+
+  fetch(scriptURL,{method:"POST",body:fd});
 }
 
-/* AUTO ENGINE */
+/* AUTO ENGINE (FIXED) */
 function runSchedule(){
 
   if(!scheduleEnabled) return;
   if(!openTime || !closeTime) return;
 
-  let now=new Date();
-  let current=now.getHours()*60+now.getMinutes();
+  let now = new Date();
+  let open = new Date(openTime);
+  let close = new Date(closeTime);
 
-  let [oh,om]=openTime.split(":").map(Number);
-  let [ch,cm]=closeTime.split(":").map(Number);
+  let newState;
 
-  let open=oh*60+om;
-  let close=ch*60+cm;
+  if(now >= open && now <= close){
+    newState = "Active";
+  }else{
+    newState = "Inactive";
+  }
 
-  let newState=(current>=open && current<close)?"Active":"Inactive";
-
-  if(newState!==lastState){
+  if(newState !== lastState){
     sendStatus(newState);
   }
 }
 
 /* START */
 loadData();
-setInterval(runSchedule,1000);
+setInterval(runSchedule,5000);
 
 </script>
 
