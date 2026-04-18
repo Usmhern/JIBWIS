@@ -66,13 +66,19 @@ tr:hover { background-color: #f1f8f1; }
 
 <div class="controls">
   <button onclick="downloadPDF()" style="background:navy; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">
-    Download PDF⬇️
+    Export PDF (Portrait)
   </button>
 
   <input type="text" id="searchInput" placeholder="Search records...">
 
   <div style="display:flex; align-items:center; gap:10px;">
+    <select id="sortOrder">
+      <option value="newest">Sort: Newest First</option>
+      <option value="az">Sort: Name (A-Z)</option>
+    </select>
+    
     <span id="totalCount" style="font-weight:bold; color:#052; background: #e8f5e9; padding: 5px 12px; border-radius: 20px;">Total: 0</span>
+    
     <select id="rowsPerPage">
       <option value="10">Show 10</option>
       <option value="25">Show 25</option>
@@ -129,13 +135,32 @@ function fetchRecords() {
 
 function applySearchAndRender() {
   const value = document.getElementById("searchInput").value.toLowerCase();
-  filteredData = allData.filter(row =>
+  const sort = document.getElementById("sortOrder").value;
+
+  // 1. Filter
+  let results = allData.filter(row =>
     Object.values(row).join(" ").toLowerCase().includes(value)
   );
+
+  // 2. Sort
+  if (sort === "az") {
+    results.sort((a, b) => {
+      // Assumes your first column is Name. Adjust "FullName" to your actual sheet header if needed.
+      const nameA = (a.FullName || a.Name || "").toString().toLowerCase();
+      const nameB = (b.FullName || b.Name || "").toString().toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+  } else {
+    // Default: Newest first (assuming RowNumber reflects insertion order)
+    results.sort((a, b) => b.rowNumber - a.rowNumber);
+  }
+
+  filteredData = results;
   renderTable();
 }
 
 document.getElementById("searchInput").addEventListener("input", applySearchAndRender);
+document.getElementById("sortOrder").addEventListener("change", applySearchAndRender);
 document.getElementById("rowsPerPage").addEventListener("change", function() {
   rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
   currentPage = 1;
@@ -191,7 +216,6 @@ function goPage(p) { currentPage = p; renderTable(); }
 
 function showNotification(msg) {
   const box = document.getElementById("notifBox");
-  if (!box) return;
   const n = document.createElement("div");
   n.className = "notif";
   n.innerText = msg;
@@ -239,9 +263,7 @@ function toggleSidebar() {
   s.style.left = (s.style.left === "0px") ? "-260px" : "0px";
 }
 
-/* ==========================================================
-   AUTO REFRESH - RUNS EVERY 2 SECONDS
-   ========================================================== */
+/* AUTO REFRESH - 2 SECONDS */
 setInterval(() => {
   const isTyping = document.activeElement === document.getElementById("searchInput");
   if (isEditing || isTyping) return;
@@ -249,11 +271,9 @@ setInterval(() => {
   fetch(scriptURL)
     .then(r => r.json())
     .then(data => {
-      // NOTIFICATION LOGIC
       if (previousLength !== 0 && data.length > previousLength) {
         showNotification("🔔 " + (data.length - previousLength) + " New Applicant(s) Added");
       }
-      // UPDATE TABLE LOGIC (Only if content changed to avoid flickering)
       if (data.length !== previousLength || JSON.stringify(data) !== JSON.stringify(allData)) {
         allData = data;
         previousLength = data.length;
@@ -263,7 +283,7 @@ setInterval(() => {
     .catch(e => console.log("Refresh failed silently"));
 }, 2000);
 
-/* PDF GENERATION */
+/* PDF GENERATION - ONLY HEADING COLORED */
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('p', 'mm', 'a4');
@@ -289,10 +309,21 @@ function downloadPDF() {
     body: tableData,
     startY: 22,
     theme: 'grid',
-    styles: { fontSize: 7, cellPadding: 2 },
-    headStyles: { fillColor: [0, 85, 34], textColor: [255, 255, 255], halign: 'center' },
-    columnStyles: { 0: { cellWidth: 8 } },
-    alternateRowStyles: { fillColor: [245, 250, 245] }
+    styles: { 
+      fontSize: 7, 
+      cellPadding: 2, 
+      textColor: [0, 0, 0], // Body text color: Black
+      fillColor: [255, 255, 255] // Body background: White
+    },
+    headStyles: { 
+      fillColor: [0, 85, 34], // Heading background: JIBWIS Green
+      textColor: [255, 255, 255], // Heading text: White
+      halign: 'center' 
+    },
+    alternateRowStyles: { 
+      fillColor: [255, 255, 255] // Disable alternate row coloring
+    },
+    columnStyles: { 0: { cellWidth: 8 } }
   });
 
   doc.save("JIBWIS_Recruitment.pdf");
