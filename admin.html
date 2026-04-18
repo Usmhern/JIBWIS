@@ -152,21 +152,15 @@ input {
 <div class="small">Auto system checks every second</div>
 
 </div>
-
 <script>
 
 const scriptURL = "https://script.google.com/macros/s/AKfycbwT49hK5zL3fEAD_BtlOBPRcLOuPIBW9AnullI4RmGH8TsBFq1xvmrRVB_Hbndo0I7z/exec";
 
 let openTime = "";
 let closeTime = "";
+let lastState = ""; // prevent repeated trigger
 
-/* MENU */
-function toggleMenu(){
-  let m = document.getElementById("menu");
-  m.style.display = (m.style.display === "block") ? "none" : "block";
-}
-
-/* LOAD STATUS + SCHEDULE */
+/* LOAD SETTINGS */
 async function loadStatus() {
   try {
     const res = await fetch(scriptURL + "?settings=1");
@@ -178,18 +172,19 @@ async function loadStatus() {
     document.getElementById("openTime").value = openTime;
     document.getElementById("closeTime").value = closeTime;
 
-    updateStatus(data.status);
+    lastState = data.status || "Inactive";
+    updateUI(lastState);
 
   } catch {
     document.getElementById("statusBox").innerHTML = "⚠️ Error loading";
   }
 }
 
-/* UPDATE STATUS UI */
-function updateStatus(status){
+/* UPDATE UI */
+function updateUI(state){
   const box = document.getElementById("statusBox");
 
-  if (status === "Active") {
+  if (state === "Active") {
     box.innerHTML = "🟢 FORM IS ACTIVE";
     box.style.background = "#d4f8d4";
     box.style.color = "green";
@@ -200,33 +195,21 @@ function updateStatus(status){
   }
 }
 
-/* MANUAL CONTROL */
-function setStatus(status) {
+/* SEND STATUS ONLY WHEN CHANGED */
+function updateServer(state){
   let fd = new FormData();
   fd.append("action", "setStatus");
-  fd.append("status", status);
+  fd.append("status", state);
 
   fetch(scriptURL, { method: "POST", body: fd })
-    .then(res => res.text())
-    .then(msg => {
-      alert(msg);
-      loadStatus();
+    .then(() => {
+      lastState = state;
+      updateUI(state);
+      console.log("Updated:", state);
     });
 }
 
-/* SAVE SCHEDULE */
-function saveSchedule() {
-  let fd = new FormData();
-  fd.append("action", "setSchedule");
-  fd.append("openTime", document.getElementById("openTime").value);
-  fd.append("closeTime", document.getElementById("closeTime").value);
-
-  fetch(scriptURL, { method: "POST", body: fd })
-    .then(res => res.text())
-    .then(msg => alert(msg));
-}
-
-/* 🔥 AUTO SCHEDULE LOGIC */
+/* 🔥 SMART SCHEDULE ENGINE */
 function checkSchedule(){
   if(!openTime || !closeTime) return;
 
@@ -239,17 +222,43 @@ function checkSchedule(){
   const open = oh*60 + om;
   const close = ch*60 + cm;
 
+  let newState;
+
   if(current >= open && current < close){
-    setStatus("Active");
+    newState = "Active";
   } else {
-    setStatus("Inactive");
+    newState = "Inactive";
+  }
+
+  // 🔥 ONLY TRIGGER IF CHANGED
+  if(newState !== lastState){
+    updateServer(newState);
   }
 }
 
-/* RUN */
+/* SAVE SCHEDULE */
+function saveSchedule() {
+  let fd = new FormData();
+  fd.append("action", "setSchedule");
+  fd.append("openTime", document.getElementById("openTime").value);
+  fd.append("closeTime", document.getElementById("closeTime").value);
+
+  fetch(scriptURL, { method: "POST", body: fd })
+    .then(res => res.text())
+    .then(msg => {
+      alert("✅ Saved. Auto system started.");
+      loadStatus(); // reload values immediately
+    });
+}
+
+/* MANUAL CONTROL */
+function setStatus(state){
+  updateServer(state);
+}
+
+/* START ENGINE */
 loadStatus();
-setInterval(loadStatus, 5000);
-setInterval(checkSchedule, 10000); // every 10 sec
+setInterval(checkSchedule, 1000); // every second
 
 </script>
 
