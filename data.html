@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Center - Manage Records</title>
+<title>JIBWIS</title>
 
 <style>
 * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -162,7 +162,7 @@ tr:hover { background-color: #f1f8f1; }
   <a href="admin.html">Settings</a>
 </div>
 
-<h2>AfriFUND Database</h2>
+<h2>FAG OF JIBWIS NGURU RECRUITMENT LIST</h2>
 
 <div class="controls">
   <button onclick="downloadPDF()" style="background:navy;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
@@ -403,7 +403,7 @@ setInterval(() => {
 
       renderTable();
     });
-}, 5000);
+}, 1000);
 
 /* ===== PDF (YOUR LOGIC KEPT) ===== */
 function formatDate(v) {
@@ -447,7 +447,7 @@ let y = margin;
 
 // Title
 pdf.setFontSize(14);
-pdf.text("AfriFUND Application Records", pageWidth / 2, y, { align: "center" });
+pdf.text("FAG OF JIBWIS NGURU, RECRUITMENT LIST", pageWidth / 2, y, { align: "center" });
 y += 8;
 
 const searchValue = document.getElementById("searchInput").value;
@@ -470,27 +470,7 @@ if (h.toLowerCase().includes("name")) {
 colWidths.push(60);
 }
 
-// ✅ EMAIL (VERY IMPORTANT - GIVE FULL SPACE)
-else if (h.toLowerCase().includes("email")) {
-colWidths.push(85); // 🔥 BIG SPACE FOR EMAIL
-}
 
-else if (h === "NIN") {
-colWidths.push(35);
-}
-
-else if (h === "Phone Number") {
-colWidths.push(30);
-}
-
-else if (h === "Account Number") {
-colWidths.push(30);
-}
-
-// ✅ columns 6,7,8 (shift smaller)
-else {
-colWidths.push(20);
-}
 });
 // Normalize
 let totalWidth = colWidths.reduce((a, b) => a + b, 0);
