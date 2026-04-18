@@ -3,158 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JIBWIS</title>
+<title>JIBWIS RECRUITMENT ADMIN</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
 <style>
 * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 body { margin: 0; padding: 20px; background: #f0f2f5; color: #333; }
-
 h2 { color: #052; text-align: center; margin-top: 20px; }
 
-.controls {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin-top: 20px;
-  gap: 10px;
-}
+.controls { display: flex; justify-content: space-between; flex-wrap: wrap; margin-top: 20px; gap: 10px; }
+.controls input, .controls select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
 
-.controls input, .controls select {
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  margin-top: 10px;
-}
-
+.table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 10px; min-height: 200px; }
 table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-th, td { padding: 12px; border: 1px solid #eee; font-size: 13px; }
-th { background: #052; color: white; position: sticky; top: 0; }
+th, td { padding: 12px; border: 1px solid #eee; font-size: 13px; text-align: left; }
+th { background: #052; color: white; position: sticky; top: 0; z-index: 10; }
 tr:hover { background-color: #f1f8f1; }
 
-.btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; cursor: pointer; }
-.btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; cursor: pointer; }
+.btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
+.btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
 
 .pagination { margin-top: 15px; text-align: center; }
-.pagination button {
-  margin: 3px;
-  padding: 6px 10px;
-  border: none;
-  background: #052;
-  color: white;
-  cursor: pointer;
-}
-.pagination button.active { background: #0a7; }
+.pagination button { margin: 3px; padding: 6px 10px; border: none; background: #052; color: white; cursor: pointer; border-radius: 3px; }
+.pagination button.active { background: #0a7; font-weight: bold; }
 
 /* MODAL */
-#editModal {
-  display: none;
-  position: fixed;
-  z-index: 2000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-}
-
-.modal-content {
-  background: white;
-  margin: 5% auto;
-  padding: 20px;
-  width: 90%;
-  max-width: 400px;
-  border-radius: 10px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-}
+#editModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+.modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 10px; max-height: 80vh; overflow-y: auto; }
+.modal-actions { display: flex; justify-content: space-between; margin-top: 15px; }
 
 /* SPINNER */
-.spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #052;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 20px auto;
-  display: none;
-}
-
+.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #052; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
 /* SIDEBAR */
-#menuBtn {
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  font-size: 22px;
-  cursor: pointer;
-  z-index: 4000;
-  background: #052;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 5px;
-}
-
-#sidebar {
-  position: fixed;
-  top: 0;
-  left: -260px;
-  width: 250px;
-  height: 100%;
-  background: #052;
-  color: white;
-  padding: 20px;
-  transition: 0.3s;
-  z-index: 3500;
-}
-
-#sidebar a {
-  display: block;
-  padding: 10px;
-  color: white;
-  text-decoration: none;
-}
-
-#sidebar a:hover { background: rgba(255,255,255,0.1); }
+#menuBtn { position: fixed; top: 15px; left: 15px; font-size: 22px; cursor: pointer; z-index: 4000; background: #052; color: white; padding: 6px 10px; border-radius: 5px; }
+#sidebar { position: fixed; top: 0; left: -260px; width: 250px; height: 100%; background: #052; color: white; padding: 20px; transition: 0.3s; z-index: 3500; }
+#sidebar h3 { border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
+#sidebar a { display: block; padding: 12px; color: white; text-decoration: none; }
+#sidebar a:hover { background: rgba(255,255,255,0.1); border-radius: 5px; }
 
 /* NOTIFICATION */
-#notifBox {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
+#notifBox { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.notif { background:#052; color:white; padding:12px 20px; border-radius:6px; animation: slideIn .3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR BUTTON -->
 <div id="menuBtn" onclick="toggleSidebar()">⋮</div>
 
-<!-- SIDEBAR -->
 <div id="sidebar">
   <h3>Menu</h3>
   <a href="index.html">Applications Form</a>
@@ -173,13 +74,11 @@ tr:hover { background-color: #f1f8f1; }
 
   <div style="display:flex; align-items:center; gap:10px;">
     <span id="totalCount" style="font-weight:bold; color:#052;">Total: 0</span>
-
     <select id="rowsPerPage">
-      <option value="10">0-10</option>
-      <option value="25">10-25</option>
-      <option value="50">10-50</option>
-      <option value="100">10-100</option>
-      <option value="all">All</option>
+      <option value="10">Show 10</option>
+      <option value="25">Show 25</option>
+      <option value="50">Show 50</option>
+      <option value="all">Show All</option>
     </select>
   </div>
 </div>
@@ -188,26 +87,21 @@ tr:hover { background-color: #f1f8f1; }
 <div class="table-responsive" id="tableContainer"></div>
 <div class="pagination" id="pagination"></div>
 
-<!-- MODAL -->
 <div id="editModal">
   <div class="modal-content">
     <h3>Edit Record</h3>
-
     <form id="editForm">
       <input type="hidden" name="rowNumber" id="editRowNumber">
       <input type="hidden" name="action" value="edit">
-
       <div id="dynamicEditFields"></div>
-
       <div class="modal-actions">
-        <button type="button" onclick="closeModal()">Cancel</button>
-        <button type="submit" id="saveBtn">Save</button>
+        <button type="button" onclick="closeModal()" style="padding:8px 15px; cursor:pointer;">Cancel</button>
+        <button type="submit" id="saveBtn" style="padding:8px 15px; background:#052; color:white; border:none; cursor:pointer;">Save Changes</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- NOTIFICATIONS -->
 <div id="notifBox"></div>
 
 <script>
@@ -218,100 +112,69 @@ let filteredData = [];
 let currentPage = 1;
 let rowsPerPage = 10;
 let previousLength = 0;
+let isEditing = false; // Prevents refresh while modal is open
 
 window.onload = fetchRecords;
 
-/* FETCH */
-/* FETCH RECORDS */
 function fetchRecords() {
   const loader = document.getElementById("loader");
   loader.style.display = "block";
-
   fetch(scriptURL)
     .then(res => res.json())
     .then(data => {
-      if (data && data.length > 0) {
-        allData = data;
-        filteredData = data;
-        previousLength = data.length; // Set initial length
-        renderTable();
-      } else {
-        document.getElementById("tableContainer").innerHTML = "<p>No records found in the sheet.</p>";
-      }
+      allData = data;
+      previousLength = data.length;
+      applySearchAndRender();
     })
-    .catch(err => {
-      console.error("Fetch error:", err);
-      document.getElementById("tableContainer").innerHTML = "<p style='color:red;'>Error loading data. Check console.</p>";
-    })
+    .catch(err => console.error("Fetch Error:", err))
     .finally(() => loader.style.display = "none");
 }
 
-/* SMART AUTO-REFRESH (Every 30 Seconds) */
-setInterval(() => {
-  fetch(scriptURL)
-    .then(r => r.json())
-    .then(data => {
-      // ONLY re-render if the number of rows changed
-      if (data.length !== previousLength) {
-        if (data.length > previousLength) {
-          showNotification("🔔 " + (data.length - previousLength) + " New Record(s) Added");
-        }
-        
-        allData = data;
-        previousLength = data.length;
-
-        // Maintain the current search filter during refresh
-        const searchValue = document.getElementById("searchInput").value.toLowerCase();
-        filteredData = allData.filter(row =>
-          Object.values(row).join(" ").toLowerCase().includes(searchValue)
-        );
-
-        renderTable();
-      }
-    })
-    .catch(e => console.log("Silent refresh failed: ", e));
-}, 30000); 
-
-/* SEARCH */
-document.getElementById("searchInput").addEventListener("input", function () {
-  const value = this.value.toLowerCase();
+/* SEARCH & FILTER LOGIC */
+function applySearchAndRender() {
+  const value = document.getElementById("searchInput").value.toLowerCase();
   filteredData = allData.filter(row =>
     Object.values(row).join(" ").toLowerCase().includes(value)
   );
-  currentPage = 1;
   renderTable();
+}
+
+document.getElementById("searchInput").addEventListener("input", () => {
+  currentPage = 1;
+  applySearchAndRender();
 });
 
-/* ROWS */
 document.getElementById("rowsPerPage").addEventListener("change", function () {
   rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
   currentPage = 1;
   renderTable();
 });
 
-/* TABLE */
+/* RENDER TABLE */
 function renderTable() {
-  document.getElementById("totalCount").innerText = "Total: " + filteredData.length;
+  const container = document.getElementById("tableContainer");
+  const countSpan = document.getElementById("totalCount");
+  
+  countSpan.innerText = "Total: " + filteredData.length;
 
-  let data = filteredData;
-  let start = (rowsPerPage === "all") ? 0 : (currentPage - 1) * rowsPerPage;
-  let paginated = (rowsPerPage === "all") ? data : data.slice(start, start + rowsPerPage);
-
-  if (!data.length) {
-    tableContainer.innerHTML = "<p>No records found.</p>";
-    pagination.innerHTML = "";
+  if (filteredData.length === 0) {
+    container.innerHTML = "<p style='padding:20px; text-align:center;'>No records found.</p>";
+    document.getElementById("pagination").innerHTML = "";
     return;
   }
 
-  let headers = Object.keys(data[0]).filter(h => h !== "rowNumber");
+  let start = (rowsPerPage === "all") ? 0 : (currentPage - 1) * rowsPerPage;
+  let paginated = (rowsPerPage === "all") ? filteredData : filteredData.slice(start, start + rowsPerPage);
+
+  // Headers (Filtering out hidden technical fields)
+  let headers = Object.keys(allData[0]).filter(h => h !== "rowNumber" && h.toLowerCase() !== "otp");
 
   let html = `<table><thead><tr><th>SN</th>`;
   headers.forEach(h => html += `<th>${h}</th>`);
   html += `<th>Actions</th></tr></thead><tbody>`;
 
   paginated.forEach((row, i) => {
-    let sn = (rowsPerPage === "all") ? (i + 1) : (start + i + 1);
-
+    let sn = start + i + 1;
     html += `<tr><td>${sn}</td>`;
     headers.forEach(h => html += `<td>${row[h] || ""}</td>`);
     html += `<td>
@@ -321,254 +184,142 @@ function renderTable() {
   });
 
   html += `</tbody></table>`;
-  tableContainer.innerHTML = html;
-
-  renderPagination(data.length);
+  container.innerHTML = html;
+  renderPagination(filteredData.length);
 }
 
-/* PAGINATION */
 function renderPagination(total) {
-  if (rowsPerPage === "all") {
-    pagination.innerHTML = "";
-    return;
-  }
+  const nav = document.getElementById("pagination");
+  if (rowsPerPage === "all") { nav.innerHTML = ""; return; }
 
   let pages = Math.ceil(total / rowsPerPage);
   let html = "";
-
   for (let i = 1; i <= pages; i++) {
     html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
   }
-
-  pagination.innerHTML = html;
+  nav.innerHTML = html;
 }
 
-function goPage(p) {
-  currentPage = p;
-  renderTable();
-}
+function goPage(p) { currentPage = p; renderTable(); }
 
-/* DELETE */
+/* ACTIONS: EDIT & DELETE */
 function deleteRow(rowNum) {
+  if(!confirm("Are you sure you want to delete this record?")) return;
+  
   let fd = new FormData();
   fd.append("action", "delete");
   fd.append("rowNumber", rowNum);
 
+  showNotification("Deleting record...");
   fetch(scriptURL, { method: "POST", body: fd })
     .then(() => fetchRecords());
 }
 
-/* EDIT */
-function buildEditForm(row) {
-  const c = document.getElementById("dynamicEditFields");
-  c.innerHTML = "";
+function openEditModal(row) {
+  isEditing = true;
+  document.getElementById("editRowNumber").value = row.rowNumber;
+  const container = document.getElementById("dynamicEditFields");
+  container.innerHTML = "";
 
   Object.keys(row).forEach(k => {
-    if (k === "rowNumber" || k.toLowerCase() === "otp") return;
-
-    c.innerHTML += `
-      <label style="font-size:12px;font-weight:bold;">${k}</label>
-      <input type="text" name="${k}" value="${row[k] || ""}" style="width:100%;padding:8px;margin:5px 0;">
+    if (k === "rowNumber" || k.toLowerCase() === "otp" || k.toLowerCase() === "timestamp") return;
+    container.innerHTML += `
+      <label style="font-size:12px;font-weight:bold;display:block;margin-top:10px;">${k}</label>
+      <input type="text" name="${k}" value="${row[k] || ""}" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;">
     `;
   });
-}
-
-function openEditModal(row) {
-  editRowNumber.value = row.rowNumber;
-  buildEditForm(row);
-  editModal.style.display = "block";
+  document.getElementById("editModal").style.display = "block";
 }
 
 function closeModal() {
-  editModal.style.display = "none";
+  document.getElementById("editModal").style.display = "none";
+  isEditing = false;
 }
 
-editForm.onsubmit = function (e) {
+document.getElementById("editForm").onsubmit = function (e) {
   e.preventDefault();
-  saveBtn.innerText = "Saving...";
+  const btn = document.getElementById("saveBtn");
+  btn.innerText = "Saving...";
 
   fetch(scriptURL, { method: "POST", body: new FormData(this) })
     .then(() => {
+      showNotification("Record updated successfully!");
       closeModal();
       fetchRecords();
     })
-    .finally(() => saveBtn.innerText = "Save");
+    .finally(() => btn.innerText = "Save Changes");
 };
 
-/* SIDEBAR */
+/* UI: SIDEBAR & NOTIFICATIONS */
 function toggleSidebar() {
   const s = document.getElementById("sidebar");
   s.style.left = (s.style.left === "0px") ? "-260px" : "0px";
 }
 
-/* NOTIFICATION */
 function showNotification(msg) {
   const box = document.getElementById("notifBox");
-
   const n = document.createElement("div");
+  n.className = "notif";
   n.innerText = msg;
-  n.style.cssText = `
-    background:#052;color:white;padding:12px;border-radius:6px;
-    animation: slideIn .3s ease;
-  `;
-
   box.appendChild(n);
-
-  setTimeout(() => {
-    n.remove();
-  }, 4000);
+  setTimeout(() => n.remove(), 4000);
 }
 
-/* AUTO REFRESH + LIVE ALERT */
+/* AUTO REFRESH (Every 20 Seconds, only if not editing) */
 setInterval(() => {
+  if (isEditing) return;
+
   fetch(scriptURL)
     .then(r => r.json())
     .then(data => {
-
-      if (previousLength && data.length > previousLength) {
-        showNotification("🔔 " + (data.length - previousLength) + " New Record(s) Added");
+      if (data.length !== previousLength) {
+        if (previousLength > 0 && data.length > previousLength) {
+          showNotification("🔔 " + (data.length - previousLength) + " New Record(s) Added");
+        }
+        allData = data;
+        previousLength = data.length;
+        applySearchAndRender();
       }
-
-      previousLength = data.length;
-
-      allData = data;
-
-      const v = document.getElementById("searchInput").value.toLowerCase();
-
-      filteredData = allData.filter(r =>
-        Object.values(r).join(" ").toLowerCase().includes(v)
-      );
-
-      renderTable();
     });
-}, 1000);
+}, 20000);
 
-/* ===== PDF (YOUR LOGIC KEPT) ===== */
-function formatDate(v) {
-  if (!v) return "";
-  let d = new Date(v);
-  if (isNaN(d)) return v;
-  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-}
-    async function downloadPDF() {
-const { jsPDF } = window.jspdf;
-
-let data = filteredData;
-if (data.length === 0) {
-alert("No data available to download.");
-return;
-}
-
-// Remove first & last column
-
-let allHeaders = Object.keys(data[0]).filter(h => {
-let key = h.toLowerCase();
-
-return (
-h !== "rowNumber" &&
-key !== "timestamp" &&
-key !== "email" &&
-key !== "otp"
-);
-});
-// still remove first & last column if needed
-let headers = allHeaders.slice(1, -1);
-
-const pdf = new jsPDF('l', 'mm', 'a4');
-
-const pageWidth = 297;
-const pageHeight = 210;
-const margin = 10;
-const usableWidth = pageWidth - margin * 2;
-
-let y = margin;
-
-// Title
-pdf.setFontSize(14);
-pdf.text("FAG OF JIBWIS NGURU, RECRUITMENT LIST", pageWidth / 2, y, { align: "center" });
-y += 8;
-
-const searchValue = document.getElementById("searchInput").value;
-if (searchValue) {
-pdf.setFontSize(10);
-pdf.text("Filter: " + searchValue, margin, y);
-y += 6;
-}
-
-pdf.setFontSize(9);
-
-// ✅ SMART COLUMN WIDTHS
-let colWidths = [];
-colWidths.push(10); // SN
-
-headers.forEach(h => {
-
-// ✅ NAME (2nd column)
-if (h.toLowerCase().includes("name")) {
-colWidths.push(60);
-}
-
-
-});
-// Normalize
-let totalWidth = colWidths.reduce((a, b) => a + b, 0);
-let scale = usableWidth / totalWidth;
-colWidths = colWidths.map(w => w * scale);
-
-const rowHeight = 7;
-
-function drawHeader() {
-let x = margin;
-pdf.setFont(undefined, "bold");
-
-// SN    
-pdf.rect(x, y, colWidths[0], rowHeight);    
-pdf.text("SN", x + colWidths[0]/2, y + 5, { align: "center" });    
-x += colWidths[0];    
-
-headers.forEach((h, i) => {    
-  let headerText = h;    
-
-  // ✅ Rename headers    
-  if (h === "Phone Number") headerText = "Phone No.";    
-  if (h === "Account Number") headerText = "ACC No";    
-
-  pdf.rect(x, y, colWidths[i + 1], rowHeight);    
-
-  // ✅ CENTER HEADER TEXT    
-async function downloadPDF() {
+/* PDF GENERATION (Repaired with AutoTable) */
+function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('l', 'mm', 'a4');
-  
-  if (filteredData.length === 0) return alert("No data to export");
 
-  // Filter out unwanted columns
-  const headers = Object.keys(filteredData[0]).filter(h => 
-    !["rowNumber", "OTP", "timestamp", "Email"].includes(h)
+  if (filteredData.length === 0) {
+    alert("No data to download.");
+    return;
+  }
+
+  // Filter keys for display
+  const headers = Object.keys(allData[0]).filter(h => 
+    !["rowNumber", "otp", "timestamp"].includes(h.toLowerCase())
   );
 
-  const tableData = filteredData.map((row, index) => {
-    return [index + 1, ...headers.map(h => row[h] || "")];
-  });
+  const tableData = filteredData.map((row, index) => [
+    index + 1,
+    ...headers.map(h => row[h] || "")
+  ]);
 
+  doc.setFontSize(16);
+  doc.setTextColor(0, 85, 34);
   doc.text("FAG OF JIBWIS NGURU RECRUITMENT LIST", 14, 15);
   
   doc.autoTable({
     head: [['SN', ...headers]],
     body: tableData,
-    startY: 20,
+    startY: 22,
     theme: 'grid',
-    styles: { fontSize: 8 },
-    headStyles: { fillStyle: [0, 85, 34] } // JIBWIS Green
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillStyle: [0, 85, 34], textColor: [255, 255, 255] },
+    alternateRowStyles: { fillStyle: [240, 248, 240] }
   });
 
   doc.save("JIBWIS_Recruitment_List.pdf");
 }
-
-  
-
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </body>
 </html>
