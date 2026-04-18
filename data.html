@@ -9,45 +9,49 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
 <style>
-* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+* { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 body { margin: 0; padding: 20px; background: #f0f2f5; color: #333; }
-h2 { color: #052; text-align: center; margin-top: 20px; }
+h2 { color: #052; text-align: center; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; }
 
-.controls { display: flex; justify-content: space-between; flex-wrap: wrap; margin-top: 20px; gap: 10px; }
-.controls input, .controls select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+.controls { display: flex; justify-content: space-between; flex-wrap: wrap; margin-top: 20px; gap: 10px; align-items: center; }
+.controls input, .controls select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; outline: none; }
+.controls input:focus { border-color: #052; }
 
-.table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 10px; min-height: 200px; }
-table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-th, td { padding: 12px; border: 1px solid #eee; font-size: 13px; text-align: left; }
-th { background: #052; color: white; position: sticky; top: 0; z-index: 10; }
+.table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 15px; }
+table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+th, td { padding: 12px 15px; border: 1px solid #eee; font-size: 13px; text-align: left; }
+th { background: #052; color: white; position: sticky; top: 0; z-index: 10; text-transform: uppercase; }
 tr:hover { background-color: #f1f8f1; }
 
-.btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
-.btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; }
+.btn-edit { background: #ff9800; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+.btn-delete { background: #d9534f; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+.btn-edit:hover { background: #e68a00; }
+.btn-delete:hover { background: #c9302c; }
 
-.pagination { margin-top: 15px; text-align: center; }
-.pagination button { margin: 3px; padding: 6px 10px; border: none; background: #052; color: white; cursor: pointer; border-radius: 3px; }
-.pagination button.active { background: #0a7; font-weight: bold; }
+.pagination { margin-top: 20px; text-align: center; }
+.pagination button { margin: 0 4px; padding: 8px 12px; border: none; background: #052; color: white; cursor: pointer; border-radius: 4px; transition: 0.3s; }
+.pagination button.active { background: #0a7; font-weight: bold; transform: scale(1.1); }
+.pagination button:disabled { background: #ccc; cursor: not-allowed; }
 
-/* MODAL */
-#editModal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-.modal-content { background: white; margin: 5% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 10px; max-height: 80vh; overflow-y: auto; }
-.modal-actions { display: flex; justify-content: space-between; margin-top: 15px; }
-
-/* SPINNER */
-.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #052; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
-@keyframes spin { 100% { transform: rotate(360deg); } }
+/* MODAL STYLES */
+#editModal { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); }
+.modal-content { background: white; margin: 5% auto; padding: 25px; width: 90%; max-width: 450px; border-radius: 12px; max-height: 85vh; overflow-y: auto; position: relative; }
+.modal-content h3 { margin-top: 0; color: #052; border-bottom: 2px solid #052; padding-bottom: 10px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.modal-actions button { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
 
 /* SIDEBAR */
-#menuBtn { position: fixed; top: 15px; left: 15px; font-size: 22px; cursor: pointer; z-index: 4000; background: #052; color: white; padding: 6px 10px; border-radius: 5px; }
-#sidebar { position: fixed; top: 0; left: -260px; width: 250px; height: 100%; background: #052; color: white; padding: 20px; transition: 0.3s; z-index: 3500; }
-#sidebar h3 { border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
-#sidebar a { display: block; padding: 12px; color: white; text-decoration: none; }
-#sidebar a:hover { background: rgba(255,255,255,0.1); border-radius: 5px; }
+#menuBtn { position: fixed; top: 15px; left: 15px; font-size: 24px; cursor: pointer; z-index: 4000; background: #052; color: white; padding: 5px 12px; border-radius: 5px; }
+#sidebar { position: fixed; top: 0; left: -260px; width: 250px; height: 100%; background: #052; color: white; padding: 20px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 3500; box-shadow: 4px 0 10px rgba(0,0,0,0.2); }
+#sidebar a { display: block; padding: 15px; color: white; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+#sidebar a:hover { background: rgba(255,255,255,0.1); padding-left: 25px; }
 
-/* NOTIFICATION */
+/* SPINNER */
+.spinner { border: 4px solid #f3f3f3; border-top: 4px solid #052; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 40px auto; display: none; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
 #notifBox { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-.notif { background:#052; color:white; padding:12px 20px; border-radius:6px; animation: slideIn .3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.notif { background: #052; color: white; padding: 15px 25px; border-radius: 8px; animation: slideIn 0.4s ease-out; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-left: 5px solid #0a7; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 </style>
 </head>
@@ -57,23 +61,23 @@ tr:hover { background-color: #f1f8f1; }
 <div id="menuBtn" onclick="toggleSidebar()">⋮</div>
 
 <div id="sidebar">
-  <h3>Menu</h3>
-  <a href="index.html">Applications Form</a>
-  <a href="verify.html">Admin</a>
-  <a href="admin.html">Settings</a>
+  <h2 style="color:white; font-size: 1.2rem; text-align: left;">Admin Menu</h2>
+  <a href="index.html">📖 APPLICATION FORM</a>
+  <a href="data.html">📚 DATA</a>
+  <a href="admin.html">⚙️ SETTINGS</a>
 </div>
 
-<h2>FAG OF JIBWIS NGURU RECRUITMENT LIST</h2>
+<h2>Recruitment Management Portal</h2>
 
 <div class="controls">
-  <button onclick="downloadPDF()" style="background:navy;color:white;border:none;padding:8px 15px;border-radius:5px;cursor:pointer;">
-    Download PDF
+  <button onclick="downloadPDF()" style="background:navy; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">
+    Export PDF (Portrait)
   </button>
 
-  <input type="text" id="searchInput" placeholder="Search records...">
+  <input type="text" id="searchInput" placeholder="Search by name, phone, or state...">
 
   <div style="display:flex; align-items:center; gap:10px;">
-    <span id="totalCount" style="font-weight:bold; color:#052;">Total: 0</span>
+    <span id="totalCount" style="font-weight:bold; color:#052; background: #e8f5e9; padding: 5px 12px; border-radius: 20px;">Total: 0</span>
     <select id="rowsPerPage">
       <option value="10">Show 10</option>
       <option value="25">Show 25</option>
@@ -89,14 +93,14 @@ tr:hover { background-color: #f1f8f1; }
 
 <div id="editModal">
   <div class="modal-content">
-    <h3>Edit Record</h3>
+    <h3>Update Applicant Details</h3>
     <form id="editForm">
       <input type="hidden" name="rowNumber" id="editRowNumber">
       <input type="hidden" name="action" value="edit">
       <div id="dynamicEditFields"></div>
       <div class="modal-actions">
-        <button type="button" onclick="closeModal()" style="padding:8px 15px; cursor:pointer;">Cancel</button>
-        <button type="submit" id="saveBtn" style="padding:8px 15px; background:#052; color:white; border:none; cursor:pointer;">Save Changes</button>
+        <button type="button" onclick="closeModal()" style="background:#eee;">Cancel</button>
+        <button type="submit" id="saveBtn" style="background:#052; color:white;">Update Record</button>
       </div>
     </form>
   </div>
@@ -112,7 +116,7 @@ let filteredData = [];
 let currentPage = 1;
 let rowsPerPage = 10;
 let previousLength = 0;
-let isEditing = false; // Prevents refresh while modal is open
+let isEditing = false; 
 
 window.onload = fetchRecords;
 
@@ -126,11 +130,13 @@ function fetchRecords() {
       previousLength = data.length;
       applySearchAndRender();
     })
-    .catch(err => console.error("Fetch Error:", err))
+    .catch(err => {
+      console.error("Fetch Error:", err);
+      document.getElementById("tableContainer").innerHTML = "<p style='color:red; text-align:center;'>Failed to load data. Please check your connection.</p>";
+    })
     .finally(() => loader.style.display = "none");
 }
 
-/* SEARCH & FILTER LOGIC */
 function applySearchAndRender() {
   const value = document.getElementById("searchInput").value.toLowerCase();
   filteredData = allData.filter(row =>
@@ -150,15 +156,13 @@ document.getElementById("rowsPerPage").addEventListener("change", function () {
   renderTable();
 });
 
-/* RENDER TABLE */
 function renderTable() {
   const container = document.getElementById("tableContainer");
   const countSpan = document.getElementById("totalCount");
-  
   countSpan.innerText = "Total: " + filteredData.length;
 
   if (filteredData.length === 0) {
-    container.innerHTML = "<p style='padding:20px; text-align:center;'>No records found.</p>";
+    container.innerHTML = "<p style='padding:30px; text-align:center; font-style:italic;'>No matching records found.</p>";
     document.getElementById("pagination").innerHTML = "";
     return;
   }
@@ -166,8 +170,10 @@ function renderTable() {
   let start = (rowsPerPage === "all") ? 0 : (currentPage - 1) * rowsPerPage;
   let paginated = (rowsPerPage === "all") ? filteredData : filteredData.slice(start, start + rowsPerPage);
 
-  // Headers (Filtering out hidden technical fields)
-  let headers = Object.keys(allData[0]).filter(h => h !== "rowNumber" && h.toLowerCase() !== "otp");
+  // Filter out the columns you don't want to see in the table
+  let headers = Object.keys(allData[0]).filter(h => 
+    h !== "rowNumber" && h.toLowerCase() !== "otp" && h.toLowerCase() !== "timestamp"
+  );
 
   let html = `<table><thead><tr><th>SN</th>`;
   headers.forEach(h => html += `<th>${h}</th>`);
@@ -190,7 +196,7 @@ function renderTable() {
 
 function renderPagination(total) {
   const nav = document.getElementById("pagination");
-  if (rowsPerPage === "all") { nav.innerHTML = ""; return; }
+  if (rowsPerPage === "all" || total <= rowsPerPage) { nav.innerHTML = ""; return; }
 
   let pages = Math.ceil(total / rowsPerPage);
   let html = "";
@@ -202,15 +208,14 @@ function renderPagination(total) {
 
 function goPage(p) { currentPage = p; renderTable(); }
 
-/* ACTIONS: EDIT & DELETE */
 function deleteRow(rowNum) {
-  if(!confirm("Are you sure you want to delete this record?")) return;
+  if(!confirm("Warning: This will permanently remove the record. Continue?")) return;
   
   let fd = new FormData();
   fd.append("action", "delete");
   fd.append("rowNumber", rowNum);
 
-  showNotification("Deleting record...");
+  showNotification("Processing deletion...");
   fetch(scriptURL, { method: "POST", body: fd })
     .then(() => fetchRecords());
 }
@@ -224,8 +229,8 @@ function openEditModal(row) {
   Object.keys(row).forEach(k => {
     if (k === "rowNumber" || k.toLowerCase() === "otp" || k.toLowerCase() === "timestamp") return;
     container.innerHTML += `
-      <label style="font-size:12px;font-weight:bold;display:block;margin-top:10px;">${k}</label>
-      <input type="text" name="${k}" value="${row[k] || ""}" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:4px;">
+      <label style="font-size:12px; font-weight:bold; display:block; margin-top:12px; color:#555;">${k.toUpperCase()}</label>
+      <input type="text" name="${k}" value="${row[k] || ""}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; margin-top:4px;">
     `;
   });
   document.getElementById("editModal").style.display = "block";
@@ -239,18 +244,21 @@ function closeModal() {
 document.getElementById("editForm").onsubmit = function (e) {
   e.preventDefault();
   const btn = document.getElementById("saveBtn");
-  btn.innerText = "Saving...";
+  btn.innerText = "Synchronizing...";
+  btn.disabled = true;
 
   fetch(scriptURL, { method: "POST", body: new FormData(this) })
     .then(() => {
-      showNotification("Record updated successfully!");
+      showNotification("Database updated successfully!");
       closeModal();
       fetchRecords();
     })
-    .finally(() => btn.innerText = "Save Changes");
+    .finally(() => {
+      btn.innerText = "Update Record";
+      btn.disabled = false;
+    });
 };
 
-/* UI: SIDEBAR & NOTIFICATIONS */
 function toggleSidebar() {
   const s = document.getElementById("sidebar");
   s.style.left = (s.style.left === "0px") ? "-260px" : "0px";
@@ -262,40 +270,45 @@ function showNotification(msg) {
   n.className = "notif";
   n.innerText = msg;
   box.appendChild(n);
-  setTimeout(() => n.remove(), 4000);
+  setTimeout(() => {
+    n.style.opacity = "0";
+    setTimeout(() => n.remove(), 500);
+  }, 3500);
 }
 
-/* AUTO REFRESH (Every 20 Seconds, only if not editing) */
+// Background Sync (Every 30 seconds)
 setInterval(() => {
   if (isEditing) return;
-
   fetch(scriptURL)
     .then(r => r.json())
     .then(data => {
       if (data.length !== previousLength) {
         if (previousLength > 0 && data.length > previousLength) {
-          showNotification("🔔 " + (data.length - previousLength) + " New Record(s) Added");
+          showNotification("🔔 " + (data.length - previousLength) + " New Applicant(s) Registered!");
         }
         allData = data;
         previousLength = data.length;
         applySearchAndRender();
       }
     });
-}, 20000);
+}, 30000);
 
-/* PDF GENERATION (Repaired with AutoTable) */
+/* REPAIRED PDF GENERATION - PORTRAIT & FILTERED */
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('l', 'mm', 'a4');
+  const doc = new jsPDF('p', 'mm', 'a4');
 
   if (filteredData.length === 0) {
-    alert("No data to download.");
+    alert("Nothing to export.");
     return;
   }
 
-  // Filter keys for display
+  // Define strictly excluded technical columns
+  const excluded = ["rownumber", "timestamp", "otp"];
+
+  // Filter headers for the PDF
   const headers = Object.keys(allData[0]).filter(h => 
-    !["rowNumber", "otp", "timestamp"].includes(h.toLowerCase())
+    !excluded.includes(h.toLowerCase())
   );
 
   const tableData = filteredData.map((row, index) => [
@@ -303,21 +316,38 @@ function downloadPDF() {
     ...headers.map(h => row[h] || "")
   ]);
 
-  doc.setFontSize(16);
-  doc.setTextColor(0, 85, 34);
-  doc.text("FAG OF JIBWIS NGURU RECRUITMENT LIST", 14, 15);
+  doc.setFontSize(14);
+  doc.setTextColor(0, 85, 34); 
+  doc.text("FAG OF JIBWIS NGURU RECRUITMENT LIST", 105, 15, { align: "center" });
   
   doc.autoTable({
     head: [['SN', ...headers]],
     body: tableData,
     startY: 22,
     theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillStyle: [0, 85, 34], textColor: [255, 255, 255] },
-    alternateRowStyles: { fillStyle: [240, 248, 240] }
+    styles: { 
+      fontSize: 7.5, 
+      cellPadding: 2,
+      valign: 'middle'
+    },
+    headStyles: { 
+      fillColor: [0, 85, 34], 
+      textColor: [255, 255, 255],
+      halign: 'center',
+      fontStyle: 'bold'
+    },
+    columnStyles: {
+      0: { cellWidth: 10, halign: 'center' }
+    },
+    alternateRowStyles: { fillColor: [245, 250, 245] }
   });
 
-  doc.save("JIBWIS_Recruitment_List.pdf");
+  const dateStr = new Date().toLocaleDateString();
+  doc.setFontSize(8);
+  doc.setTextColor(100);
+  doc.text(`Generated on: ${dateStr}`, 14, doc.internal.pageSize.height - 10);
+
+  doc.save("JIBWIS_Recruitment.pdf");
 }
 </script>
 
