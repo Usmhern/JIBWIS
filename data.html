@@ -62,19 +62,19 @@ tr:hover { background-color: #f1f8f1; }
   <a href="admin.html">⚙️ SETTINGS</a>
 </div>
 
-<h2>Recruitment Management Portal</h2>
+<h2>JIBWIS MANAGEMENT PORTAL</h2>
 
 <div class="controls">
-  <button onclick="downloadPDF()" style="background:navy; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">
-    Export PDF (Current View)
+  <button onclick="downloadPDF()" style="background:darkred; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">
+    Download PDF ⬇️
   </button>
 
   <input type="text" id="searchInput" placeholder="Search records...">
 
   <div style="display:flex; align-items:center; gap:10px;">
     <select id="sortOrder">
-      <option value="normal">Sort: Normal</option>
-      <option value="az">Sort: A - Z</option>
+      <option value="normal">Normal</option>
+      <option value="az">A - Z</option>
     </select>
     
     <span id="totalCount" style="font-weight:bold; color:#052; background: #e8f5e9; padding: 5px 12px; border-radius: 20px;">Total: 0</span>
@@ -306,7 +306,7 @@ function downloadPDF() {
   doc.setFontSize(14);
   doc.setTextColor(0, 85, 34); 
   const isSearch = document.getElementById("searchInput").value !== "";
-  const title = isSearch ? "SEARCH RESULTS - RECRUITMENT LIST" : "FULL RECRUITMENT LIST";
+  const title = isSearch ? "FAG OF JIBWIS NGURU RECRUITMENT LIST" : "FAG OF JIBWIS RECRUITMENT LIST";
   doc.text(title, 105, 15, { align: "center" });
   
   doc.autoTable({
@@ -331,7 +331,7 @@ function downloadPDF() {
     columnStyles: { 0: { cellWidth: 8 } }
   });
 
-  const fileName = isSearch ? "Search_Results.pdf" : "Full_List.pdf";
+  const fileName = isSearch ? "JIBWIS SEARCH.pdf" : "JIBWIS.pdf";
   doc.save(fileName);
 }
 </script>
