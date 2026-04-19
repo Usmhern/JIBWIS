@@ -182,8 +182,8 @@ Checking system status...
 </div>
 
 <div class="input-group">
-<label>AGE <span style="color:red">*</span></label>
-<select id="age-dropdown" name="age" required>
+<label>AGE <span style="color:red"></span></label>
+<select id="age-dropdown" name="age">
 <option value="">Select Age</option>
 </select>
 </div>
@@ -257,7 +257,7 @@ const statusBox = document.getElementById("statusBox");
     statusBox.style.color = "orange";
     return "Error";
   }
-}
+},*/
 
 // FORM SUBMIT
 form.addEventListener("submit", async (e)=>{
@@ -291,7 +291,7 @@ form.addEventListener("submit", async (e)=>{
     submitBtn.classList.remove("blinking");
     submitBtn.innerHTML = "SUBMIT";
   });
-});*/
+});
 async function checkStatus(){
   try{
     const res = await fetch(adminURL + "?settings=1&nocache=" + Date.now());
