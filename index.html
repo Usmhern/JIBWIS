@@ -320,7 +320,7 @@ async function checkStatus(){
       let percent = (passed / total) * 100;
       progressBar.style.width = Math.min(percent,100) + "%";
 
-    }else{
+    }else if{
 
       statusBox.innerHTML = "🔴 APPLICATION IS CLOSED";
       statusBox.style.color = "red";
@@ -337,6 +337,10 @@ async function checkStatus(){
 
       progressBar.style.width = Math.max(0, Math.min(percent,100)) + "%";
     }
+   else{
+    scheduleText.innerHTML = ``;
+ 
+   }
 
     return data.status;
 
