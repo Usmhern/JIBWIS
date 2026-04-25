@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JIBWIS Admin</title>
+
+<style>
+body{
+  font-family:Segoe UI;
+  background:#eee;
+  padding:20px;
+  display:flex;
+  justify-content:center;
+}
+
+.container{
+  width:350px;
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  text-align:center;
+  position:relative;
+}
+
+/* watermark logo */
+.container::before{
+  content:"";
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:250px;
+  height:250px;
+  background:url('jibwis.png') no-repeat center;
+  background-size:contain;
+  opacity:0.08;
+  transform:translate(-50%,-50%);
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border:none;
+  border-bottom:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  background:#052;
+  color:white;
+  border:none;
+  border-radius:8px;
+  margin-top:5px;
+}
+
+table{
+  width:100%;
+  margin-top:15px;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+th,td{
+  border:1px solid #ccc;
+  padding:6px;
+}
+
+.actions button{
+  width:auto;
+  padding:5px;
+  margin:2px;
+}
+
+.total{
+  margin-top:10px;
+  font-weight:bold;
+  color:green;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<img src="20251223_194733.png" width="100" style="border-radius:100%;border:2px solid orange;">
+
+<h3>JIBWIS ADMIN PANEL</h3>
+
+<form id="form">
+<input type="text" id="name" placeholder="Name" required>
+
+<select id="amount" required>
+<option value="">Select Amount</option>
+<option value="1500">₦1500</option>
+<option value="3000">₦3000</option>
+</select>
+
+<button type="submit">Submit</button>
+</form>
+
+<div class="total" id="totalMoney">Total: ₦0</div>
+
+<input type="text" id="search" placeholder="Search...">
+
+<select id="sort">
+<option value="normal">Normal</option>
+<option value="az">A-Z</option>
+</select>
+
+<table>
+<thead>
+<tr>
+<th>SN</th>
+<th>Name</th>
+<th>Form</th>
+<th>ID</th>
+<th>Total</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+</div>
+
+<script>
+const scriptURL = "YOUR_WEB_APP_URL";
+let allData = [];
+
+const nameInput = document.getElementById("name");
+const amountInput = document.getElementById("amount");
+
+// SUBMIT
+document.getElementById("form").addEventListener("submit", e=>{
+ e.preventDefault();
+
+ let name = nameInput.value;
+ let amount = parseInt(amountInput.value);
+
+ let formFee=0,idCard=0,total=0;
+
+ if(amount===1500){
+  formFee=1500;
+  total=1500;
+ }
+
+ if(amount===3000){
+  formFee=1500;
+  idCard=1500;
+  total=3000;
+ }
+
+ let formID="JIB-"+Date.now();
+
+ fetch(scriptURL,{
+  method:"POST",
+  body:JSON.stringify({name,formFee,idCard,total,formID})
+ })
+ .then(()=>{ fetchData(); document.getElementById("form").reset(); });
+});
+
+// FETCH DATA
+function fetchData(){
+ fetch(scriptURL+"?get=1")
+ .then(res=>res.json())
+ .then(data=>{
+  allData=data;
+  render(data);
+  calcTotal();
+ });
+}
+
+// RENDER TABLE
+function render(data){
+ let tbody=document.getElementById("tbody");
+ tbody.innerHTML="";
+
+ data.forEach((r,i)=>{
+  tbody.innerHTML+=`
+  <tr>
+   <td>${r[0]}</td>
+   <td contenteditable onblur="edit(${i},this.innerText)">${r[1]}</td>
+   <td>${r[2]}</td>
+   <td>${r[3]}</td>
+   <td>${r[4]}</td>
+   <td class="actions">
+     <button onclick="del(${i})">Delete</button>
+   </td>
+  </tr>`;
+ });
+}
+
+// TOTAL MONEY
+function calcTotal(){
+ let sum=0;
+ allData.forEach(r=> sum += Number(r[4]));
+ document.getElementById("totalMoney").innerText="Total: ₦"+sum;
+}
+
+// DELETE
+function del(index){
+ fetch(scriptURL,{
+  method:"POST",
+  body:JSON.stringify({delete:index+2})
+ })
+ .then(()=>fetchData());
+}
+
+// EDIT
+function edit(index,newName){
+ fetch(scriptURL,{
+  method:"POST",
+  body:JSON.stringify({edit:index+2,name:newName})
+ })
+ .then(()=>fetchData());
+}
+
+// SEARCH
+document.getElementById("search").addEventListener("input",e=>{
+ let val=e.target.value.toLowerCase();
+ render(allData.filter(r=>r[1].toLowerCase().includes(val)));
+});
+
+// SORT
+document.getElementById("sort").addEventListener("change",e=>{
+ if(e.target.value==="az"){
+  render([...allData].sort((a,b)=>a[1].localeCompare(b[1])));
+ }else{
+  render(allData);
+ }
+});
+
+fetchData();
+</script>
+
+</body>
+</html>
